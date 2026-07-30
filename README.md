@@ -17,14 +17,14 @@ A desktop book library manager built with PyQt6. Track your books, lending histo
 
 ## Quick Install
 
-Clone the repository and run the one-liner for your platform. Each command installs system dependencies, Python packages, and builds a native package.
+Install Katip Celebi on Windows using WinGet, or build a native package for your Linux distribution using the one-liners below.
 
-All build commands use the bundled `KatipCelebi.spec` — no need to pass `--add-data`, `--name`, `--windowed`, or `--icon` flags.
+Linux build commands use the bundled `KatipCelebi.spec` — no need to pass `--add-data`, `--name`, `--windowed`, or `--icon` flags.
 
-### Windows (PowerShell, requires [Python 3.11+](https://www.python.org/downloads/))
-
+## Windows (Powershell / CMD)
 ```powershell
-$ErrorActionPreference='Stop'; cd $HOME; if (Test-Path KatipCelebi) { Remove-Item -Recurse -Force KatipCelebi }; git clone https://github.com/farukylmz0550/KatipCelebi.git; cd KatipCelebi; python -m pip install --upgrade pip; python -m pip install -r requirements.txt pyinstaller; python -m PyInstaller KatipCelebi.spec; Write-Host "Build complete: $PWD\dist\KatipCelebi\KatipCelebi.exe"
+
+winget install farukylmz0550.katipcelebi
 ```
 
 ### Ubuntu / Debian (apt)
