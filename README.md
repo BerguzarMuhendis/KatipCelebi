@@ -111,8 +111,9 @@ KatipCelebi/
 │   └── styles/             # default.qss (custom theme template)
 ├── KatipCelebi.spec        # PyInstaller build spec
 ├── requirements.txt
-├── LICENSE                 # GPLv3
-└── CONTRIBUTING.Mmd        # Contributing rules file
+├── LICENSE-GPLV3           # Source code license (GPLv3)
+├── LICENSE-APACHE          # Asset license (Apache 2.0)
+└── CONTRIBUTING.md         # Contributing rules file
 ```
 
 ## Custom Themes
