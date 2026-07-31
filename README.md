@@ -129,6 +129,9 @@ Place a `custom.qss` file in the app data directory to create your own look. Sel
 
 ## License
 
-[GNU General Public License v3.0](LICENSE)
+This project uses mixed licensing to separate source code from design assets:
+
+*   **Source Code:** All code in this repository is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.txt).
+*   **Visual Assets:** All graphics, logos, and images are licensed under the [APACHE 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 Copyright (C) 2026 farukylmz0550
