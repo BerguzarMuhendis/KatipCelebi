@@ -27,9 +27,6 @@ Linux build commands use the bundled `KatipCelebi.spec` — no need to pass `--a
 ```powershell
 git clone https://github.com/farukylmz0550/KatipCelebi.git && cd KatipCelebi && python -m venv .venv && .\.venv\Scripts\Activate && pip install -r requirements.txt pyinstaller && pyinstaller KatipCelebi.spec
 ```
-
-The command clones the repository, creates a virtual environment, installs every dependency, and builds with the bundled `KatipCelebi.spec` — no need to pass `--add-data`, `--name`, `--windowed`, or `--icon` flags, the icon is embedded in the executable. The result is `dist\KatipCelebi.exe`.
-
 ### Ubuntu / Debian (apt)
 
 ```bash
