@@ -24,10 +24,10 @@ It is rotated. A log nobody ever looks at is a log that grows until it is the
 biggest file the user owns.
 """
 
-from pathlib import Path
 import logging
 import logging.handlers
 import sys
+from pathlib import Path
 
 from shared.paths import LOG_FILENAME
 

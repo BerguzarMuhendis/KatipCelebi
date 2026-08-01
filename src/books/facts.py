@@ -26,8 +26,8 @@ It works the same way as the personal panel: it holds the book's key, not the
 book, and asks the library for the current one whenever it needs it.
 """
 
+from collections.abc import Callable
 from dataclasses import replace
-from typing import Callable
 
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import (

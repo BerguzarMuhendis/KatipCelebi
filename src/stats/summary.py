@@ -27,7 +27,6 @@ No Qt in this file. The page draws what these functions return.
 from collections import Counter
 from dataclasses import dataclass
 from datetime import date, datetime
-from typing import Optional
 
 from books.model import Book
 from books.reading import (
@@ -90,7 +89,7 @@ def finished_in_month(books: list[Book], year: int, month: int) -> int:
     )
 
 
-def average_days_to_finish(books: list[Book]) -> Optional[float]:
+def average_days_to_finish(books: list[Book]) -> float | None:
     """How long a book usually takes. None when nothing can be measured yet.
 
     Only books with both stamps count: a book finished without the app watching
@@ -107,7 +106,7 @@ def average_days_to_finish(books: list[Book]) -> Optional[float]:
 def time_spent(
     books: list[Book],
     window_days: int = WINDOW_YEAR,
-    today: Optional[date] = None,
+    today: date | None = None,
 ) -> list[tuple[str, float]]:
     """Which books your reading time went into, longest first.
 
@@ -115,7 +114,7 @@ def time_spent(
     were started: a book with no start date took an unknown time, and guessing
     would put a made-up number in a chart about real ones.
     """
-    day = today or date.today()
+    day = today or date.today()  # noqa: DTZ011 - the app's day is wall-clock
     out = []
     for book in _finished(books):
         finished = parse_stamp(book.finished_date)
@@ -184,16 +183,16 @@ class Goal:
 
 
 def year_goal(
-    books: list[Book], target: int, today: Optional[date] = None
+    books: list[Book], target: int, today: date | None = None
 ) -> Goal:
-    today = today or datetime.now().date()
+    today = today or datetime.now().date()  # noqa: DTZ005 - wall-clock, like the stamps
     return Goal(target=target, done=finished_in_year(books, today.year))
 
 
 def month_goal(
-    books: list[Book], target: int, today: Optional[date] = None
+    books: list[Book], target: int, today: date | None = None
 ) -> Goal:
-    today = today or datetime.now().date()
+    today = today or datetime.now().date()  # noqa: DTZ005 - wall-clock, like the stamps
     return Goal(
         target=target, done=finished_in_month(books, today.year, today.month)
     )

@@ -18,9 +18,9 @@
 
 import logging
 from dataclasses import replace
-from typing import Optional
+from pathlib import Path
 
-from PyQt6.QtCore import QObject, QRunnable, QThreadPool, Qt, pyqtSignal
+from PyQt6.QtCore import QObject, QRunnable, Qt, QThreadPool, pyqtSignal
 from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -39,11 +39,14 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from pathlib import Path
-
 from books import tags
 from books.card import StarRating
-from books.excel import TEMPLATE_DEFAULT_NAME, read_template, write_template
+from books.excel import (
+    TEMPLATE_DEFAULT_NAME,
+    FileTooLarge,
+    read_template,
+    write_template,
+)
 from books.filters import SIGNED_VALUE
 from books.model import (
     ISBN_LENGTH,
@@ -179,7 +182,7 @@ class AddBookPage(QWidget):
         super().__init__(parent)
         self.library = library
         self.fields: dict[str, QLineEdit] = {}
-        self._signals: Optional[LookupSignals] = None
+        self._signals: LookupSignals | None = None
         self._looking_up = False
         # The ISBN of the last book a lookup failed to find. A book saved by
         # hand under this key is the one worth offering to Open Library.
@@ -376,7 +379,7 @@ class AddBookPage(QWidget):
         self._signals = signals  # keep it alive until it has fired
         QThreadPool.globalInstance().start(LookupTask(asked_about, signals))
 
-    def _lookup_done(self, book: Optional[Book], asked_about: str) -> None:
+    def _lookup_done(self, book: Book | None, asked_about: str) -> None:
         self._looking_up = False
         self.fetch_button.setEnabled(True)
         # The box stays editable while we wait, so the answer may be about a
@@ -428,7 +431,18 @@ class AddBookPage(QWidget):
         )
         if not chosen:
             return
-        isbns = read_template(Path(chosen))
+        try:
+            isbns = read_template(Path(chosen))
+        except FileTooLarge:
+            # The file is fine; it is just too big to read. Say that, and not
+            # the "could not read it" sentence -- that one would send somebody
+            # looking for a broken file.
+            QMessageBox.critical(
+                self,
+                text("import_too_large_title"),
+                text("import_too_large"),
+            )
+            return
         if isbns is None:
             QMessageBox.critical(
                 self,

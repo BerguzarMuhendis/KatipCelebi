@@ -8,12 +8,13 @@ A desktop book library manager built with PyQt6. Track your books, lending histo
 ## Features
 
 - **Library management** — add, edit, and organise books with ISBN lookup via Open Library
+- **ISBN list import** — paste ISBNs into a `.xlsx` template and add them in bulk (files up to 20 MiB)
 - **Lending tracker** — record who borrowed which book and when
 - **Reading statistics** — charts and goals to track your reading habits
 - **Multiple themes** — Material 3 (light/dark), Adwaita (light/dark), system preference, and custom QSS
 - **Multi-language** — English, Turkish, Russian, Chinese, Spanish, French
-- **Excel export** — export your library to `.xlsx`
-- **Cross-platform** — runs on Windows, Linux, and macOS
+- **Excel export** — export your library to `.xlsx`, safe from formula injection
+- **Cross-platform** — runs on Windows and Linux
 
 ## Quick Install
 
@@ -88,7 +89,7 @@ echo "Build complete: katipcelebi-1.0-1-x86_64.pkg.tar.zst"
 
 ```bash
 git clone https://github.com/farukylmz0550/KatipCelebi.git && cd KatipCelebi
-python3 -m venv .venv && . .venv/bin/activate   # Linux/macOS
+python3 -m venv .venv && . .venv/bin/activate   # Linux
 python -m venv .venv; .\.venv\Scripts\Activate   # Windows
 pip install -r requirements.txt
 python src/app.py             # launch the app

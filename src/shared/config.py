@@ -16,10 +16,10 @@
 
 """The settings file: small, but it is what remembers where the books are."""
 
-from pathlib import Path
-from typing import Any, Optional
 import json
 import logging
+from pathlib import Path
+from typing import Any
 
 from shared.paths import config_path
 from shared.storage import backup_file, write_atomically
@@ -88,7 +88,7 @@ def update(**values: Any) -> bool:
 # what the key is spelled like.
 
 
-def library_dir() -> Optional[Path]:
+def library_dir() -> Path | None:
     """Where the user keeps their books.
 
     None until they have said, and None again if it has gone.

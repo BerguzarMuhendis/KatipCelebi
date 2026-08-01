@@ -19,10 +19,10 @@
 No Qt, no files, no network -- just the record and its rules.
 """
 
-from dataclasses import asdict, dataclass, fields
-from typing import Any
 import re
 import uuid
+from dataclasses import asdict, dataclass, fields
+from typing import Any
 
 # A book with no ISBN still needs a name of its own to be found by. Nothing is
 # ever shown to the user under this key -- see Book.display_isbn.
@@ -118,8 +118,8 @@ class Book:
         exception -- a book with an odd rating is still the user's book.
         """
         if not isinstance(data, dict):
-            raise ValueError(
-                "a book must be a JSON object, got %s" % type(data).__name__
+            raise TypeError(
+                f"a book must be a JSON object, got {type(data).__name__}"
             )
         known = set(cls.field_names())
         values = {}

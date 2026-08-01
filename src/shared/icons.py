@@ -116,7 +116,7 @@ def symbol(name: str, ink: str, size: int = ICON_SIZE) -> QIcon:
     # The file has no fill of its own, so it would paint black -- invisible on
     # a dark page. The colour goes on the <svg> tag, where every path inherits
     # it.
-    drawing = drawing.replace("<svg ", '<svg fill="%s" ' % ink, 1)
+    drawing = drawing.replace("<svg ", f'<svg fill="{ink}" ', 1)
     renderer = QSvgRenderer(QByteArray(drawing.encode("utf-8")))
     if not renderer.isValid():
         logger.warning("Unreadable icon at %s", path)
@@ -197,4 +197,4 @@ def flag(language: str) -> str:
 def with_flag(language: str, name: str) -> str:
     """A language's name in the picker, flag first."""
     mark = flag(language)
-    return "%s  %s" % (mark, name) if mark else name
+    return f"{mark}  {name}" if mark else name

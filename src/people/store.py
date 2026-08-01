@@ -16,9 +16,8 @@
 
 """The people and the loans, and the two files they live in."""
 
-from pathlib import Path
-from typing import Optional
 import logging
+from pathlib import Path
 
 from books.model import Book
 from people.model import Loan, Person, now, open_loan_for
@@ -77,15 +76,15 @@ class Ledger:
         for row in result.rows:
             try:
                 out.append(kind.from_dict(row))
-            except ValueError:
+            except TypeError:
                 logger.error("Skipping an unreadable entry in %s", path)
         return out
 
     # -------------------------------------------------------------- people ---
-    def find_person(self, person_id: str) -> Optional[Person]:
+    def find_person(self, person_id: str) -> Person | None:
         return next((p for p in self.people if p.id == person_id), None)
 
-    def person_named(self, name: str) -> Optional[Person]:
+    def person_named(self, name: str) -> Person | None:
         # Both sides normalized, not just the query: a name loaded from a hand-
         # edited people.json keeps whatever spacing was typed there, so "Ali
         # Veli" would not find a stored "Ali  Veli" and a second, identical-
@@ -100,7 +99,7 @@ class Ledger:
             None,
         )
 
-    def add_person(self, name: str) -> Optional[Person]:
+    def add_person(self, name: str) -> Person | None:
         """Add somebody.
 
         None when the name is empty, already taken, or unsaved.
@@ -189,7 +188,7 @@ class Ledger:
 
         return open_loans_for(self.loans, book_key)
 
-    def open_loan_for(self, book_key: str) -> Optional[Loan]:
+    def open_loan_for(self, book_key: str) -> Loan | None:
         return open_loan_for(self.loans, book_key)
 
     def out_count(self, book_key: str) -> int:

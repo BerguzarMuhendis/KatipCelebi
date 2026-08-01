@@ -26,12 +26,12 @@ out from the one seed the user picked, by Material Design 3's rules. This file
 knows which name goes where; it does not know what purple is.
 """
 
+import logging
+import sys
+
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QPalette
 from PyQt6.QtWidgets import QStyleFactory
-
-import logging
-import sys
 
 logger = logging.getLogger("katipcelebi")
 
@@ -212,7 +212,6 @@ def _wear_custom(app) -> None:
 
 
 # --------------------------------------------------- custom QSS loading ---
-import re as _re
 from pathlib import Path as _Path
 
 
@@ -285,7 +284,7 @@ def _capture(app) -> None:
     if _platform_style is None:
         try:
             _platform_style = app.style().name()
-        except Exception:  # pragma: no cover - a Qt without QStyle.name()
+        except Exception:  # noqa: BLE001 - pragma: no cover - a Qt without QStyle.name()
             _platform_style = ""
         _system_seed = palette.system_seed(app)
 
@@ -310,7 +309,7 @@ def _wear_native(app, dark: bool) -> dict:
     """Take our stylesheet off and let adwaita-qt draw. If adwaita-qt is not
     installed, renders libadwaita's look with an own stylesheet instead."""
     global _seed, _shades
-    keys = {k.lower(): k for k in QStyleFactory.keys()}
+    keys = {k.lower(): k for k in QStyleFactory}
     want = "adwaita-dark" if dark else "adwaita"
     if want not in keys:
         # adwaita-qt is not installed -- render libadwaita's look ourselves.

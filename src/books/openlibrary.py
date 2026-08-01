@@ -23,12 +23,12 @@ what comes back -- every field is read on its own, and an odd one costs that
 field rather than the book.
 """
 
-from pathlib import Path
-from typing import Any, Optional
 import json
 import logging
 import urllib.error
 import urllib.request
+from pathlib import Path
+from typing import Any
 
 from books import tags
 from books.model import Book, normalize_isbn
@@ -133,24 +133,24 @@ def _dict_list(value: Any) -> list[dict]:
 
 # --------------------------------------------------------------- the book ---
 def _author_name(key: str) -> str:
-    data = _get_json("%s%s.json" % (API_ROOT, key))
+    data = _get_json(f"{API_ROOT}{key}.json")
     return _text(data.get("name")) if isinstance(data, dict) else ""
 
 
 def _work_subjects(work_key: str) -> list[str]:
     if not work_key:
         return []
-    data = _get_json("%s%s.json" % (API_ROOT, work_key))
+    data = _get_json(f"{API_ROOT}{work_key}.json")
     return _string_list(data.get("subjects")) if isinstance(data, dict) else []
 
 
-def fetch_book(isbn: str) -> Optional[Book]:
+def fetch_book(isbn: str) -> Book | None:
     """Everything an ISBN lookup can tell us.
 
     None when there is no such book.
     """
     key = normalize_isbn(isbn)
-    edition = _get_json("%s/isbn/%s.json" % (API_ROOT, key))
+    edition = _get_json(f"{API_ROOT}/isbn/{key}.json")
     if not isinstance(edition, dict):
         return None
 
@@ -224,7 +224,7 @@ def _edition(book: Book) -> dict:
     isbn = normalize_isbn(book.key)
     edition = {
         "title": book.title,
-        "source_records": ["katipcelebi-manual:%s" % isbn],
+        "source_records": [f"katipcelebi-manual:{isbn}"],
     }
     if book.authors.strip():
         edition["authors"] = [
@@ -275,7 +275,7 @@ def submit_book(book: Book, username: str, password: str) -> str:
     try:
         _post(
             opener,
-            "%s/account/login" % API_ROOT,
+            f"{API_ROOT}/account/login",
             {"username": username, "password": password},
         ).close()
     except urllib.error.HTTPError:
@@ -286,7 +286,7 @@ def submit_book(book: Book, username: str, password: str) -> str:
         return SUBMIT_NETWORK
 
     try:
-        reply = _post(opener, "%s/api/import" % API_ROOT, _edition(book))
+        reply = _post(opener, f"{API_ROOT}/api/import", _edition(book))
         with reply:
             if reply.status in (200, 201):
                 logger.info("Submitted %s to Open Library", book.key)
@@ -309,10 +309,10 @@ def _is_image(data: bytes) -> bool:
 
 
 def cover_cache_path(isbn: str, size: str) -> Path:
-    return cover_cache_dir() / ("%s_%s.jpg" % (normalize_isbn(isbn), size))
+    return cover_cache_dir() / (f"{normalize_isbn(isbn)}_{size}.jpg")
 
 
-def fetch_cover(isbn: str, size: str = COVER_SIZE_THUMB) -> Optional[bytes]:
+def fetch_cover(isbn: str, size: str = COVER_SIZE_THUMB) -> bytes | None:
     """A book's cover, from the cache when we have it.
 
     None when there isn't one.
@@ -332,7 +332,7 @@ def fetch_cover(isbn: str, size: str = COVER_SIZE_THUMB) -> Optional[bytes]:
                 "Could not read the cached cover %s", cached, exc_info=True
             )
 
-    url = "%s%s-%s.jpg?default=false" % (COVERS_ROOT, key, size)
+    url = f"{COVERS_ROOT}{key}-{size}.jpg?default=false"
     try:
         request = urllib.request.Request(
             url, headers={"User-Agent": USER_AGENT}

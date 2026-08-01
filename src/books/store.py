@@ -16,9 +16,8 @@
 
 """The library: the books, and the file they live in."""
 
-from pathlib import Path
-from typing import Optional
 import logging
+from pathlib import Path
 
 from books.model import Book
 from shared.paths import library_path
@@ -41,7 +40,7 @@ class Library:
         self.books: list[Book] = []
         # Set when the file was unreadable and had to be moved aside, so the
         # window can say where the user's books went.
-        self.rescued_to: Optional[Path] = None
+        self.rescued_to: Path | None = None
         self.skipped_entries = 0
 
     @property
@@ -65,7 +64,7 @@ class Library:
         for row in result.rows:
             try:
                 books.append(Book.from_dict(row))
-            except ValueError:
+            except TypeError:
                 self.skipped_entries += 1
         self.books = books
 
@@ -97,7 +96,7 @@ class Library:
     def save(self) -> bool:
         return write_rows(self.path, [book.to_dict() for book in self.books])
 
-    def find(self, key: str) -> Optional[Book]:
+    def find(self, key: str) -> Book | None:
         return next((b for b in self.books if b.key == key), None)
 
     def add(self, book: Book) -> bool:

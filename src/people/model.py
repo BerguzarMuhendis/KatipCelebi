@@ -23,15 +23,16 @@ holding the same fact is two places that can disagree, and the one that is
 wrong is always the one being read.
 """
 
+import uuid
 from dataclasses import asdict, dataclass, fields
 from datetime import datetime
-from typing import Any, Optional
-import uuid
+from typing import Any
 
 
 def now() -> str:
     """The moment, as it is written down."""
-    return datetime.now().isoformat(timespec="seconds")
+    # Wall-clock time, deliberately naive -- the stamp is a local record.
+    return datetime.now().isoformat(timespec="seconds")  # noqa: DTZ005
 
 
 def as_date(stamp: str) -> str:
@@ -60,8 +61,8 @@ class Person:
     @classmethod
     def from_dict(cls, data: Any) -> "Person":
         if not isinstance(data, dict):
-            raise ValueError(
-                "a person must be a JSON object, got %s" % type(data).__name__
+            raise TypeError(
+                f"a person must be a JSON object, got {type(data).__name__}"
             )
         known = {f.name for f in fields(cls)}
         values = {
@@ -103,8 +104,8 @@ class Loan:
     @classmethod
     def from_dict(cls, data: Any) -> "Loan":
         if not isinstance(data, dict):
-            raise ValueError(
-                "a loan must be a JSON object, got %s" % type(data).__name__
+            raise TypeError(
+                f"a loan must be a JSON object, got {type(data).__name__}"
             )
         known = {f.name for f in fields(cls)}
         values = {
@@ -130,7 +131,7 @@ def open_loans_for(loans: list[Loan], book_key: str) -> list[Loan]:
     ]
 
 
-def open_loan_for(loans: list[Loan], book_key: str) -> Optional[Loan]:
+def open_loan_for(loans: list[Loan], book_key: str) -> Loan | None:
     """Who has this book right now, if anyone -- the longest-standing of them.
 
     Only for the places that can say one name and no more. Anything that has to

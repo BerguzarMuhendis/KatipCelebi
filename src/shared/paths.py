@@ -21,9 +21,9 @@ that remember that choice, the cover cache, the log -- lives in the usual place
 for the platform, so a fresh install still knows where to look.
 """
 
-from pathlib import Path
 import os
 import sys
+from pathlib import Path
 
 APP_DIR_NAME = "KatipCelebi"
 

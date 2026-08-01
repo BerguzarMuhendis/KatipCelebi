@@ -21,8 +21,8 @@ that owns this panel: it writes the book and says whether the disk took it, so
 there is one place that decides what to do when a save fails.
 """
 
+from collections.abc import Callable
 from dataclasses import replace
-from typing import Callable
 
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
@@ -192,7 +192,7 @@ class PersonalPanel(QWidget):
     def _show_status(self, book: Book) -> None:
         index = self.status_combo.findData(status_of(book))
         self.status_combo.blockSignals(True)
-        self.status_combo.setCurrentIndex(index if index >= 0 else 0)
+        self.status_combo.setCurrentIndex(max(index, 0))
         self.status_combo.blockSignals(False)
 
     def _save_status(self, *_args) -> None:

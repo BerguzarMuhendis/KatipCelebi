@@ -29,13 +29,12 @@ about to be overwritten with nothing. It is moved aside first, under a name
 that says what happened, and the caller is told.
 """
 
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Optional
 import json
 import logging
 import os
 import shutil
+from dataclasses import dataclass
+from pathlib import Path
 
 logger = logging.getLogger("katipcelebi")
 
@@ -47,8 +46,8 @@ class DataFileDamaged(Exception):
     their data went rather than just shown an empty window.
     """
 
-    def __init__(self, path: Path, rescued_to: Optional[Path]):
-        super().__init__("%s could not be read" % path)
+    def __init__(self, path: Path, rescued_to: Path | None):
+        super().__init__(f"{path} could not be read")
         self.path = path
         self.rescued_to = rescued_to
 
@@ -66,13 +65,13 @@ class LoadResult:
     skipped: int = 0
 
 
-def rescue_file(path: Path) -> Optional[Path]:
+def rescue_file(path: Path) -> Path | None:
     """Move a file out of the way, never overwriting an earlier rescue.
 
     Returns where it went, or None if even that failed.
     """
     for suffix in [".damaged.bak"] + [
-        ".damaged.%d.bak" % n for n in range(1, 100)
+        f".damaged.{n}.bak" for n in range(1, 100)
     ]:
         candidate = path.with_name(path.name + suffix)
         if candidate.exists():
@@ -89,7 +88,7 @@ def rescue_file(path: Path) -> Optional[Path]:
     return None
 
 
-def backup_file(path: Path) -> Optional[Path]:
+def backup_file(path: Path) -> Path | None:
     """Keep a copy of a file next to itself before we rewrite it."""
     target = path.with_name(path.name + ".bak")
     try:

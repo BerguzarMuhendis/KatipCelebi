@@ -23,8 +23,8 @@ in the library's folder and travels with it. Put in the settings file it would
 be left behind the first time somebody moved their library to another machine.
 """
 
-from pathlib import Path
 import logging
+from pathlib import Path
 
 from shared.storage import DataFileDamaged, read_rows, write_rows
 

@@ -19,9 +19,9 @@
 Where the books live, how the app looks, and what it is.
 """
 
+import sys
 from html import escape
 from pathlib import Path
-import sys
 
 from PyQt6.QtCore import QSize, Qt, pyqtSignal
 from PyQt6.QtWidgets import (
@@ -36,11 +36,18 @@ from PyQt6.QtWidgets import (
 )
 
 from shared import config, texts
+from shared.icons import dress, logo, with_flag
 from shared.palette import has_a_desktop
 from shared.paths import cover_cache_dir
-from shared.icons import dress, logo, with_flag
 from shared.texts import text
-from shared.theme import DEFAULT_THEME, THEMES, colours, current_seed, family, theme_preview_pixmap
+from shared.theme import (
+    DEFAULT_THEME,
+    THEMES,
+    colours,
+    current_seed,
+    family,
+    theme_preview_pixmap,
+)
 
 APP_VERSION = "2.0"
 
@@ -198,7 +205,7 @@ class SettingsPage(QWidget):
         column.addWidget(self.colour_label)
 
     def _about_text(self) -> str:
-        """What the licence asks to be said, with the source a click away.
+        """Who wrote this, where it lives, with the source a click away.
 
         The link is coloured here because Qt colours links from its own
         palette, not from our stylesheet -- so left alone it comes out a blue
@@ -206,17 +213,14 @@ class SettingsPage(QWidget):
         the desktop's accent.
         """
         return (
-            "<b>%s %s</b><br>%s<br><br>%s<br><br>"
-            '<a href="%s" style="color: %s">%s</a>'
-            % (
-                escape(text("app_name")),
-                escape(APP_VERSION),
-                escape(COPYRIGHT),
-                escape(text("about_licence")),
-                escape(SOURCE_URL),
-                colours()["accent"],
-                escape(SOURCE_URL),
-            )
+            "<b>{0} {1}</b><br>{2}<br><br>"
+            '<a href="{3}" style="color: {4}">{3}</a>'
+        ).format(
+            escape(text("app_name")),
+            escape(APP_VERSION),
+            escape(COPYRIGHT),
+            escape(SOURCE_URL),
+            colours()["accent"],
         )
 
     def _heading(self, column, key: str) -> QLabel:
@@ -230,7 +234,7 @@ class SettingsPage(QWidget):
         self.folder_label.setText(str(self.main_window.library.folder))
         index = self.theme_combo.findData(config.theme())
         self.theme_combo.blockSignals(True)
-        self.theme_combo.setCurrentIndex(index if index >= 0 else 0)
+        self.theme_combo.setCurrentIndex(max(index, 0))
         self.theme_combo.blockSignals(False)
         self.cache_label.setText(
             text("settings_cache_size").format(mb=cache_size_mb())
@@ -286,7 +290,7 @@ class SettingsPage(QWidget):
 
     # ------------------------------------------------------------ custom QSS -
     def _show_qss(self) -> None:
-        from shared.theme import _qss_user_path, _qss_styles_dir
+        from shared.theme import _qss_styles_dir, _qss_user_path
         user = _qss_user_path()
         if user.exists():
             self.qss_label.setText(str(user))
@@ -295,8 +299,9 @@ class SettingsPage(QWidget):
             self.qss_label.setText(str(default))
 
     def _open_qss(self) -> None:
-        from shared.theme import _qss_user_path, _qss_styles_dir
         import subprocess
+
+        from shared.theme import _qss_styles_dir, _qss_user_path
         user = _qss_user_path()
         if not user.exists():
             # Copy the default to the user's data dir so they can edit it.
@@ -314,6 +319,7 @@ class SettingsPage(QWidget):
 
     def _reload_qss(self) -> None:
         from PyQt6.QtWidgets import QApplication
+
         from shared.theme import apply_theme
         apply_theme(QApplication.instance(), config.theme())
         from shared.icons import redress

@@ -34,6 +34,9 @@ from PyQt6.QtWidgets import (
 )
 
 from books.reading import READ, READING, WANT_TO_READ, format_duration
+from shared import shape
+from shared.texts import text
+from shared.theme import colour, slice_colours
 from stats.goals import Goals
 from stats.summary import (
     RECENT_WINDOWS,
@@ -44,14 +47,11 @@ from stats.summary import (
     finished_in_year,
     month_goal,
     tag_spread,
-    top_authors,
     time_spent,
+    top_authors,
     top_publishers,
     year_goal,
 )
-from shared.texts import text
-from shared import shape
-from shared.theme import colour, slice_colours
 
 
 class MetricCard(QFrame):
@@ -78,12 +78,12 @@ class MetricCard(QFrame):
 
 def count_label(name: str, value: float) -> str:
     """A wedge that stands for a number of books."""
-    return "%s (%d)" % (name, value)
+    return f"{name} ({int(value)})"
 
 
 def duration_label(name: str, value: float) -> str:
     """A wedge that stands for an amount of time."""
-    return "%s (%s)" % (name, format_duration(value))
+    return f"{name} ({format_duration(value)})"
 
 
 def pie(
@@ -235,7 +235,7 @@ class StatsPage(QWidget):
         window_row.addWidget(QLabel(text("chart_time_window")))
         self.window_combo = QComboBox()
         for days in RECENT_WINDOWS:
-            self.window_combo.addItem(text("window_%d" % days), days)
+            self.window_combo.addItem(text(f"window_{days}"), days)
         self.window_combo.currentIndexChanged.connect(self.refresh)
         window_row.addWidget(self.window_combo)
         window_row.addStretch(1)
@@ -269,7 +269,7 @@ class StatsPage(QWidget):
 
         from datetime import datetime
 
-        now = datetime.now()
+        now = datetime.now()  # noqa: DTZ005 - wall-clock, like the stamps
         self.cards["this_month"].show_value(
             str(finished_in_month(books, now.year, now.month))
         )

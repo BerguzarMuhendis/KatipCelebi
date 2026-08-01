@@ -47,7 +47,7 @@ All Python code must follow [PEP 8](https://peps.python.org/pep-0008/).
 
 ```bash
 pip install ruff black
-ruff check src/
+ruff check .                     # zero errors
 black --check src/
 ```
 
@@ -55,6 +55,7 @@ If there are style issues, auto-fix with:
 
 ```bash
 black src/
+ruff check . --fix
 ```
 
 Fix any logical issues flagged by `ruff` (unused variables, unnecessary imports, etc.) manually.

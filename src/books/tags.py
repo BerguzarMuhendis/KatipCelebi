@@ -182,7 +182,7 @@ def _is_edition_language(lowered: str) -> bool:
     that also threw away "Sign language" and "Body language", which are
     subjects in their own right.
     """
-    return any(lowered == "%s language" % name for name in _LANGUAGE_NAMES)
+    return any(lowered == f"{name} language" for name in _LANGUAGE_NAMES)
 
 
 def is_noise(subject: str) -> bool:

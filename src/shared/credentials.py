@@ -45,7 +45,7 @@ try:
     import keyring.errors
 
     _KEYRING = keyring
-except Exception:  # pragma: no cover - keyring absent or backendless
+except Exception:  # noqa: BLE001 - pragma: no cover - keyring absent or backendless
     _KEYRING = None
 
 
@@ -64,7 +64,7 @@ def can_remember() -> bool:
         from keyring.backends import fail
 
         return not isinstance(_KEYRING.get_keyring(), fail.Keyring)
-    except Exception:  # pragma: no cover - no usable backend
+    except Exception:  # noqa: BLE001 - pragma: no cover - no usable backend
         return False
 
 

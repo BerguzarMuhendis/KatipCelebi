@@ -22,7 +22,6 @@ tested here.
 
 from dataclasses import replace
 from datetime import datetime
-from typing import Optional
 
 from books.model import Book
 from shared.texts import text
@@ -37,10 +36,12 @@ STATUS_ANY = "any"  # for the filter row
 
 
 def now() -> str:
-    return datetime.now().isoformat(timespec="seconds")
+    # Wall-clock time, deliberately naive: the stamps are local records, and
+    # parse_stamp strips any offset on the way back in.
+    return datetime.now().isoformat(timespec="seconds")  # noqa: DTZ005
 
 
-def parse_stamp(stamp: str) -> Optional[datetime]:
+def parse_stamp(stamp: str) -> datetime | None:
     """A stored timestamp, or None. The file can be edited by hand.
 
     The offset is dropped if one is there. The app writes naive stamps, but a
@@ -96,7 +97,7 @@ def next_step(book: Book) -> str:
 
 
 # ------------------------------------------------------------ how long it ---
-def reading_days(book: Book) -> Optional[float]:
+def reading_days(book: Book) -> float | None:
     """How long the book took, in days. None when we cannot say."""
     started = parse_stamp(book.started_date)
     finished = parse_stamp(book.finished_date)
@@ -107,7 +108,7 @@ def reading_days(book: Book) -> Optional[float]:
 
 def duration_parts(days: float) -> tuple[int, int, int]:
     """A span in days, as whole days, hours and minutes."""
-    total_minutes = int(round(days * 24 * 60))
+    total_minutes = round(days * 24 * 60)
     return (
         total_minutes // 1440,
         (total_minutes % 1440) // 60,
@@ -115,7 +116,7 @@ def duration_parts(days: float) -> tuple[int, int, int]:
     )
 
 
-def format_duration(days: Optional[float]) -> str:
+def format_duration(days: float | None) -> str:
     """How long a book took, said the way a person would say it.
 
     At most two units, largest first: "5 days", "2 days 6 hours", "45 minutes".

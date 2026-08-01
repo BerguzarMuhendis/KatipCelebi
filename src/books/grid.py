@@ -16,6 +16,8 @@
 
 """The library page: a wall of covers, and a box to search them with."""
 
+from pathlib import Path
+
 from PyQt6.QtCore import QPoint, QRect, QSize, Qt, pyqtSignal
 from PyQt6.QtGui import QImage
 from PyQt6.QtWidgets import (
@@ -34,8 +36,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from pathlib import Path
-
+from books import tags
 from books.card import BookCard
 from books.excel import EXPORT_DEFAULT_NAME, export_library
 from books.filters import (
@@ -53,7 +54,6 @@ from books.filters import (
     Filters,
     arrange,
 )
-from books import tags
 from books.model import Book
 from books.reading import STATUS_ANY, STATUSES
 from shared.icons import dress
@@ -409,7 +409,7 @@ class LibraryPage(QWidget):
         for tag in tags.tags_in_use(self._books):
             self.tag_combo.addItem(tags.display(tag), tag)
         index = self.tag_combo.findData(chosen) if chosen else 0
-        self.tag_combo.setCurrentIndex(index if index >= 0 else 0)
+        self.tag_combo.setCurrentIndex(max(index, 0))
         self.tag_combo.blockSignals(False)
 
     def card_for(self, key: str):

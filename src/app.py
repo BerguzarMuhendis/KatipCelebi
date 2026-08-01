@@ -16,9 +16,9 @@
 
 """The way in: the window, the pages, and the first-run questions."""
 
-from pathlib import Path
 import logging
 import sys
+from pathlib import Path
 
 from PyQt6.QtCore import QSize, Qt, pyqtSignal
 from PyQt6.QtGui import QFontMetrics
@@ -46,15 +46,14 @@ from books.store import Library
 from people.page import PeoplePage
 from people.store import Ledger
 from settings.page import SettingsPage
-from stats.goals import Goals
-from stats.page import StatsPage
-from shared import config
+from shared import config, texts
+from shared.icons import app_icon, dress, logo, redress, with_flag
 from shared.logs import point_at as point_log_at
 from shared.paths import default_library_dir
-from shared.icons import app_icon, dress, logo, redress, with_flag
-from shared import texts
 from shared.texts import text
 from shared.theme import THEMES, apply_theme, theme_preview_pixmap
+from stats.goals import Goals
+from stats.page import StatsPage
 
 logger = logging.getLogger("katipcelebi")
 
@@ -421,7 +420,7 @@ class MainWindow(QMainWindow):
         )
         self.folder_label.setToolTip(path)
 
-    def _change_theme(self, name: str = None) -> None:
+    def _change_theme(self, name: str | None = None) -> None:
         """Re-dress the app, and redraw everything that paints itself.
 
         The stylesheet (or, under a native theme, the platform style) reaches

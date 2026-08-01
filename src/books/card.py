@@ -171,7 +171,7 @@ class BookCard(QFrame):
         author = self.book.authors.strip()
         title = self.book.title.strip()
         return (
-            "%s - %s" % (author, title)
+            f"{author} - {title}"
             if author and title
             else (title or author)
         )

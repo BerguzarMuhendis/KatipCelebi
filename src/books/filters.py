@@ -139,9 +139,7 @@ class Filters:
             return False
         if self.status != STATUS_ANY and status_of(book) != self.status:
             return False
-        if self.tag and not tags.contains(book.tags, self.tag):
-            return False
-        return True
+        return not (self.tag and not tags.contains(book.tags, self.tag))
 
 
 def sort_key(book: Book, mode: str):

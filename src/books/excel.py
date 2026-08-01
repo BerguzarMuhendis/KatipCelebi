@@ -22,9 +22,8 @@ It is not a second save format: the app's own files are the JSON next door, and
 nothing here is ever read back into them.
 """
 
-from pathlib import Path
-from typing import Optional
 import logging
+from pathlib import Path
 
 try:
     import openpyxl
@@ -42,6 +41,31 @@ logger = logging.getLogger("katipcelebi")
 
 TEMPLATE_DEFAULT_NAME = "isbn_list.xlsx"
 EXPORT_DEFAULT_NAME = "my_library.xlsx"
+
+# How big a file the app is willing to read. A spreadsheet full of ISBNs is
+# not a novel: anything near this size is a mistake or a machine, and reading
+# it would cost the user's time (and the app's memory) for nothing it could
+# give back.
+MAX_IMPORT_BYTES = 20 * 1024 * 1024  # 20 MiB
+
+# A value starting with one of these is Excel's idea of a formula -- or, with
+# @, a spreadsheet command. A book is allowed to be called "=1+1" and a person
+# "+44 20..." -- the words are text, and writing them as formulas would make
+# the file run whatever the file's author typed into it.
+_FORMULA_START = ("=", "+", "-", "@")
+
+
+def _formula_safe(value):
+    """A cell value, with any formula a spreadsheet might see defused.
+
+    The leading apostrophe is Excel's own "this is text" mark. The file gets
+    the defused value -- never the raw one -- so nothing the export writes can
+    ever be read back as something to run.
+    """
+    if isinstance(value, str) and value.startswith(_FORMULA_START):
+        return "'" + value
+    return value
+
 
 # Fields holding a timestamp. Excel gets a real datetime for these, so the
 # column sorts and filters as a date instead of being text that looks like one.
@@ -120,7 +144,12 @@ def export_library(books: list[Book], ledger, path: Path) -> bool:
         values.append(", ".join(loan.person_name for loan in out))
 
         for column, value in enumerate(values, start=1):
-            cell = sheet.cell(row=row, column=column, value=value)
+            safe = _formula_safe(value)
+            cell = sheet.cell(row=row, column=column, value=safe)
+            # The apostrophe is only a marker: told the flag, Excel shows the
+            # cell as the user's words rather than a defused "'=1+1".
+            if safe is not value and hasattr(cell, "quotePrefix"):
+                cell.quotePrefix = True
             name = COLUMN_NAMES[column - 1]
             if name in ("isbn", "isbn_10", "isbn_13"):
                 # Text, or Excel renders a 13-digit ISBN as 9.78031E+12.
@@ -189,15 +218,37 @@ def write_template(path: Path) -> bool:
         return False
 
 
-def read_template(path: Path) -> Optional[list[str]]:
+class FileTooLarge(Exception):
+    """The file exists, but is bigger than the app is willing to read.
+
+    Raised rather than answered with None: a "could not read" dialog would
+    send the user looking for a broken file, when the file is fine and only
+    too big.
+    """
+
+
+def read_template(path: Path) -> list[str] | None:
     """The ISBNs in a template. None when the file cannot be read at all.
 
     Anything that is not an ISBN is left out rather than passed on: the point
     of reading the file is to find the ISBNs in it, and a heading or a stray
     note is not a book that could not be found.
+
+    Raises FileTooLarge when the file is bigger than the app will read. The
+    size is asked before openpyxl is let anywhere near the file: a big enough
+    spreadsheet would otherwise be fully decompressed and parsed before there
+    was a chance to say no.
     """
     if openpyxl is None:
         return None
+    try:
+        size = path.stat().st_size
+    except OSError:
+        logger.exception("Could not inspect %s", path)
+        return None
+    if size > MAX_IMPORT_BYTES:
+        logger.warning("Refusing to read %s: %d bytes", path, size)
+        raise FileTooLarge(path)
     try:
         book = openpyxl.load_workbook(path, read_only=True, data_only=True)
     except Exception:

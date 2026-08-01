@@ -23,13 +23,12 @@ writing a second, diverging copy into it. Anything that fails here is put back
 before this function returns.
 """
 
-from dataclasses import dataclass
-from pathlib import Path
 import logging
 import os
 import shutil
+from dataclasses import dataclass
+from pathlib import Path
 
-from stats.goals import GOALS_FILENAME
 from shared import logs
 from shared.paths import (
     LIBRARY_FILENAME,
@@ -37,6 +36,7 @@ from shared.paths import (
     LOG_FILENAME,
     PEOPLE_FILENAME,
 )
+from stats.goals import GOALS_FILENAME
 
 logger = logging.getLogger("katipcelebi")
 
