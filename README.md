@@ -18,7 +18,7 @@ A desktop book library manager built with PyQt6. Track your books, lending histo
 
 ## Quick Install
 
-Install Katip Celebi on Windows using WinGet, or build a native package for your Linux distribution using the one-liners below.
+Install Katip Celebi on build a native package for your Linux distribution using the one-liners below.
 
 Linux build commands use the bundled `KatipCelebi.spec` — no need to pass `--add-data`, `--name`, `--windowed`, or `--icon` flags.
 
