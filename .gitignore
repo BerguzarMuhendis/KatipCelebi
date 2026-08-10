@@ -39,3 +39,6 @@ htmlcov/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# opencode project-local config.
+.opencode/
