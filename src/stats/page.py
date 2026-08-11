@@ -86,9 +86,7 @@ def duration_label(name: str, value: float) -> str:
     return f"{name} ({format_duration(value)})"
 
 
-def pie(
-    title: str, slices: list[tuple[str, float]], label=count_label
-) -> QChartView:
+def pie(title: str, slices: list[tuple[str, float]], label=count_label) -> QChartView:
     """A pie chart, or an empty one when there is nothing yet.
 
     How a wedge is named is the caller's business: three books and three days
@@ -273,15 +271,11 @@ class StatsPage(QWidget):
         self.cards["this_month"].show_value(
             str(finished_in_month(books, now.year, now.month))
         )
-        self.cards["this_year"].show_value(
-            str(finished_in_year(books, now.year))
-        )
+        self.cards["this_year"].show_value(str(finished_in_year(books, now.year)))
 
         average = average_days_to_finish(books)
         self.cards["average"].show_value(
-            text("metric_no_average")
-            if average is None
-            else format_duration(average)
+            text("metric_no_average") if average is None else format_duration(average)
         )
 
         self._show_goal(

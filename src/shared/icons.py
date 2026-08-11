@@ -34,6 +34,7 @@ import logging
 from PyQt6.QtCore import QByteArray, Qt
 from PyQt6.QtGui import QIcon, QPainter, QPixmap
 from PyQt6.QtSvg import QSvgRenderer
+from PyQt6.QtWidgets import QApplication, QStyle
 
 from shared.paths import assets_dir
 from shared.theme import colour
@@ -50,8 +51,28 @@ ICON_SIZE = 20
 # every button we ever made alive, long after its page had gone.
 ICON_KEY = "katipIconKey"
 
-# Which Material Symbol belongs on which button, keyed by the button's text
-# key -- so a button and its icon are named the same thing, in one place.
+# Native system-style icons are the default source of truth. We keep a small
+# fallback map for the older bundled SVG icons in case a style or platform does
+# not provide a matching standard icon.
+SYSTEM_ICONS = {
+    "nav_add": QStyle.StandardPixmap.SP_FileDialogNewFolder,
+    "nav_library": QStyle.StandardPixmap.SP_FileIcon,
+    "nav_people": QStyle.StandardPixmap.SP_FileDialogDetailedView,
+    "nav_stats": QStyle.StandardPixmap.SP_ComputerIcon,
+    "nav_settings": QStyle.StandardPixmap.SP_ComputerIcon,
+    "fetch": QStyle.StandardPixmap.SP_FileDialogContentsView,
+    "save": QStyle.StandardPixmap.SP_DialogSaveButton,
+    "clear": QStyle.StandardPixmap.SP_DialogCloseButton,
+    "delete_book": QStyle.StandardPixmap.SP_TrashIcon,
+    "export_button": QStyle.StandardPixmap.SP_DialogSaveButton,
+    "import_button": QStyle.StandardPixmap.SP_DialogOpenButton,
+    "template_button": QStyle.StandardPixmap.SP_FileDialogDetailedView,
+    "settings_move": QStyle.StandardPixmap.SP_DirOpenIcon,
+    "settings_clear_cache": QStyle.StandardPixmap.SP_BrowserReload,
+    "back": QStyle.StandardPixmap.SP_ArrowBack,
+}
+
+# The older bundled Material-style SVG icon names, kept only as a fallback.
 ICONS = {
     "nav_add": "library_add",
     "nav_library": "book_2",
@@ -134,7 +155,15 @@ def symbol(name: str, ink: str, size: int = ICON_SIZE) -> QIcon:
 
 
 def button_icon(key: str) -> QIcon:
-    """The picture for a button, in the colour the theme is wearing now."""
+    """The picture for a button, using the host platform's native style."""
+    style = QApplication.style() if QApplication.instance() else None
+    if style is not None:
+        standard = SYSTEM_ICONS.get(key)
+        if standard is not None:
+            icon = style.standardIcon(standard)
+            if not icon.isNull():
+                return icon
+
     name = ICONS.get(key)
     return symbol(name, colour("text_body").name()) if name else QIcon()
 

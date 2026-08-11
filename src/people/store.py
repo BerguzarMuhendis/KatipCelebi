@@ -91,11 +91,7 @@ class Ledger:
         # looking person would be added beside the first.
         wanted = normalize_name(name).casefold()
         return next(
-            (
-                p
-                for p in self.people
-                if normalize_name(p.name).casefold() == wanted
-            ),
+            (p for p in self.people if normalize_name(p.name).casefold() == wanted),
             None,
         )
 
@@ -168,16 +164,12 @@ class Ledger:
         be out with two people, and "give it back" would then have to guess
         which one came home.
         """
-        loan = next(
-            (ln for ln in self.loans if ln.id == loan_id and ln.is_open), None
-        )
+        loan = next((ln for ln in self.loans if ln.id == loan_id and ln.is_open), None)
         if loan is None:
             return False
         loan.return_date = now()
         if self._save_loans():
-            logger.info(
-                "Got %s back from %s", loan.book_title, loan.person_name
-            )
+            logger.info("Got %s back from %s", loan.book_title, loan.person_name)
             return True
         loan.return_date = ""  # the file still says it is out; so do we
         return False
@@ -217,6 +209,4 @@ class Ledger:
         return write_rows(self.people_path, [p.to_dict() for p in self.people])
 
     def _save_loans(self) -> bool:
-        return write_rows(
-            self.loans_path, [loan.to_dict() for loan in self.loans]
-        )
+        return write_rows(self.loans_path, [loan.to_dict() for loan in self.loans])

@@ -70,9 +70,7 @@ def rescue_file(path: Path) -> Path | None:
 
     Returns where it went, or None if even that failed.
     """
-    for suffix in [".damaged.bak"] + [
-        f".damaged.{n}.bak" for n in range(1, 100)
-    ]:
+    for suffix in [".damaged.bak"] + [f".damaged.{n}.bak" for n in range(1, 100)]:
         candidate = path.with_name(path.name + suffix)
         if candidate.exists():
             continue  # an older rescue: it may be the better copy, leave it be

@@ -118,9 +118,7 @@ class Book:
         exception -- a book with an odd rating is still the user's book.
         """
         if not isinstance(data, dict):
-            raise TypeError(
-                f"a book must be a JSON object, got {type(data).__name__}"
-            )
+            raise TypeError(f"a book must be a JSON object, got {type(data).__name__}")
         known = set(cls.field_names())
         values = {}
         for name, raw in data.items():
@@ -183,9 +181,7 @@ def is_valid_isbn13(isbn: str) -> bool:
     isbn = normalize_isbn(isbn)
     if len(isbn) != 13 or not isbn.isdigit():
         return False
-    total = sum(
-        int(char) * (1 if i % 2 == 0 else 3) for i, char in enumerate(isbn)
-    )
+    total = sum(int(char) * (1 if i % 2 == 0 else 3) for i, char in enumerate(isbn))
     return total % 10 == 0
 
 

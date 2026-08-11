@@ -81,9 +81,7 @@ def finish_reading(book: Book) -> Book:
     stamps, because "I read this" is true whether or not the app was watching.
     """
     started = book.started_date or now()
-    return replace(
-        book, status=READ, started_date=started, finished_date=now()
-    )
+    return replace(book, status=READ, started_date=started, finished_date=now())
 
 
 def next_step(book: Book) -> str:

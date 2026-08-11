@@ -108,26 +108,46 @@ def set_library_dir(folder: Path) -> bool:
 
 
 def theme() -> str:
-    """Which of the six themes the user picked.
+    """Which of the supported themes the user picked.
 
-    Falls back to the default, and migrates the old light/dark/system setting:
-    a file written before there were six themes still knows whether it wanted
-    light or dark, and that maps onto the Material pair. The old "system"
-    setting maps onto the new "system" theme.
+    Falls back to the default and maps legacy values onto the current Fluent/
+    Contrast set while keeping custom QSS as a valid override.
     """
-    from shared.theme import DEFAULT_THEME, M3_DARK, M3_LIGHT, SYSTEM, THEMES
+    from shared.theme import (
+        CONTRAST_DARK,
+        CONTRAST_LIGHT,
+        CUSTOM,
+        DEFAULT_THEME,
+        FLUENT_DARK,
+        FLUENT_LIGHT,
+        THEMES,
+    )
 
     data = load()
     saved = data.get("theme")
+    legacy_map = {
+        "m3-light": FLUENT_LIGHT,
+        "m3-dark": FLUENT_DARK,
+        "adwaita-light": FLUENT_LIGHT,
+        "adwaita-dark": FLUENT_DARK,
+        "system": FLUENT_DARK,
+        "custom": CUSTOM,
+        "contrast-light": CONTRAST_LIGHT,
+        "contrast-dark": CONTRAST_DARK,
+        "fluent-light": FLUENT_LIGHT,
+        "fluent-dark": FLUENT_DARK,
+    }
     if saved in THEMES:
         return saved
-    old = data.get("theme_mode")  # the pre-five-themes setting
+    if saved in legacy_map:
+        return legacy_map[saved]
+    old = data.get("theme_mode")
     if old == "system":
-        return SYSTEM
+        return FLUENT_DARK
     if old == "light":
-        return M3_LIGHT
+        return FLUENT_LIGHT
     if old == "dark":
-        return M3_DARK
+        return FLUENT_DARK
     return DEFAULT_THEME
 
 

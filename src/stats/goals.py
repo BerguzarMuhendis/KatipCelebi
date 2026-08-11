@@ -62,9 +62,7 @@ class Goals:
     def save(self) -> bool:
         # A list of one, so this file looks like every other one the app writes
         # and goes through the same careful reader and writer.
-        return write_rows(
-            self.path, [{"yearly": self.yearly, "monthly": self.monthly}]
-        )
+        return write_rows(self.path, [{"yearly": self.yearly, "monthly": self.monthly}])
 
     def set_yearly(self, target: int) -> bool:
         before = self.yearly

@@ -121,9 +121,7 @@ class Filters:
         that and the book does not, so it is handed in.
         """
         wanted = self.query.strip().casefold()
-        if wanted and wanted not in haystack(
-            book, self.search_field, lent_out
-        ):
+        if wanted and wanted not in haystack(book, self.search_field, lent_out):
             return False
         if self.min_rating and parse_rating(book.rating) < self.min_rating:
             return False
@@ -157,9 +155,7 @@ def sort_key(book: Book, mode: str):
     return (title,)
 
 
-def arrange(
-    books: list[Book], mode: str, descending: bool = False
-) -> list[Book]:
+def arrange(books: list[Book], mode: str, descending: bool = False) -> list[Book]:
     """The books in the order to show them."""
     ordered = sorted(books, key=lambda b: sort_key(b, mode))
     return list(reversed(ordered)) if descending else ordered

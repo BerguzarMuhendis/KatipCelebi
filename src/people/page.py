@@ -31,7 +31,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from people.model import as_date
+from people.model import as_date, normalize_id
 from people.store import Ledger
 from shared.texts import text
 
@@ -81,29 +81,46 @@ class PeoplePage(QWidget):
         self.empty_label.hide()
         layout.addWidget(self.empty_label)
 
-        self.table = QTableWidget(0, 4)
+        self.table = QTableWidget(0, 5)
         self.table.setHorizontalHeaderLabels(
             [
                 text("col_person"),
                 text("col_trust"),
                 text("col_returned"),
                 text("col_out"),
+                "Id",
             ]
         )
-        self.table.setSelectionBehavior(
-            QAbstractItemView.SelectionBehavior.SelectRows
-        )
-        self.table.setSelectionMode(
-            QAbstractItemView.SelectionMode.SingleSelection
-        )
-        self.table.setEditTriggers(
-            QAbstractItemView.EditTrigger.NoEditTriggers
-        )
+        self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.table.verticalHeader().setVisible(False)
+        self.table.verticalHeader().setMinimumWidth(0)
+        self.table.verticalHeader().setMaximumWidth(0)
+        self.table.verticalHeader().setDefaultSectionSize(34)
+        self.table.setMinimumHeight(220)
+        self.table.setColumnWidth(1, 90)
+        self.table.setColumnWidth(2, 98)
+        self.table.setColumnWidth(3, 90)
+        self.table.setColumnWidth(4, 120)
         self.table.horizontalHeader().setSectionResizeMode(
             0, QHeaderView.ResizeMode.Stretch
         )
+        self.table.horizontalHeader().setSectionResizeMode(
+            1, QHeaderView.ResizeMode.Fixed
+        )
+        self.table.horizontalHeader().setSectionResizeMode(
+            2, QHeaderView.ResizeMode.Fixed
+        )
+        self.table.horizontalHeader().setSectionResizeMode(
+            3, QHeaderView.ResizeMode.Fixed
+        )
+        self.table.horizontalHeader().setSectionResizeMode(
+            4, QHeaderView.ResizeMode.Fixed
+        )
+        self.table.horizontalHeader().setMinimumSectionSize(64)
         self.table.itemSelectionChanged.connect(self._show_history)
-        layout.addWidget(self.table, 1)
+        layout.addWidget(self.table, 2)
 
         self.history_label = QLabel(text("history_none"))
         self.history_label.setObjectName("pageSubtitle")
@@ -113,9 +130,12 @@ class PeoplePage(QWidget):
         self.history.setHorizontalHeaderLabels(
             [text("col_book"), text("col_lent"), text("col_returned_on")]
         )
-        self.history.setEditTriggers(
-            QAbstractItemView.EditTrigger.NoEditTriggers
-        )
+        self.history.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.history.verticalHeader().setVisible(False)
+        self.history.verticalHeader().setMinimumWidth(0)
+        self.history.verticalHeader().setMaximumWidth(0)
+        self.history.verticalHeader().setDefaultSectionSize(30)
+        self.history.setMinimumHeight(180)
         self.history.horizontalHeader().setSectionResizeMode(
             0, QHeaderView.ResizeMode.Stretch
         )
@@ -125,29 +145,33 @@ class PeoplePage(QWidget):
     def refresh(self) -> None:
         """Redraw from the ledger, keeping whoever was selected selected."""
         chosen = self.selected_person_id()
-        self.count_label.setText(
-            text("people_count").format(n=len(self.ledger.people))
-        )
+        self.count_label.setText(text("people_count").format(n=len(self.ledger.people)))
         # An empty table is a grid of nothing that explains nothing.
         nobody = not self.ledger.people
         self.empty_label.setVisible(nobody)
         self.table.setVisible(not nobody)
         self.table.setRowCount(len(self.ledger.people))
         for row, person in enumerate(self.ledger.people):
+            person_id = normalize_id(person.id)
             out = len(self.ledger.books_out_with(person.id))
             cells = (
                 person.name,
                 str(self.ledger.trust_score(person.id)),
                 str(len(self.ledger.loans_of(person.id)) - out),
                 str(out),
+                person_id,
             )
             for column, value in enumerate(cells):
-                item = QTableWidgetItem(value)
-                if column == 0:
-                    # The id rides along with the name, so a selected row can
-                    # be turned back into a person without matching on the
-                    # text.
-                    item.setData(Qt.ItemDataRole.UserRole, person.id)
+                if column == 4:
+                    text_value = normalize_id(value)
+                    item = QTableWidgetItem(text_value)
+                    item.setData(Qt.ItemDataRole.UserRole, text_value)
+                    font = item.font()
+                    font.setPointSize(10)
+                    item.setFont(font)
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                else:
+                    item = QTableWidgetItem(value)
                 self.table.setItem(row, column, item)
 
         if chosen:
@@ -158,16 +182,21 @@ class PeoplePage(QWidget):
         items = self.table.selectedItems()
         if not items:
             return ""
-        return (
-            self.table.item(items[0].row(), 0).data(Qt.ItemDataRole.UserRole)
-            or ""
+        row = items[0].row()
+        id_item = self.table.item(row, 4)
+        if id_item is None:
+            return ""
+        return normalize_id(
+            id_item.data(Qt.ItemDataRole.UserRole) or id_item.text() or ""
         )
 
     def select_person(self, person_id: str) -> None:
+        target = normalize_id(person_id)
         for row in range(self.table.rowCount()):
-            if (
-                self.table.item(row, 0).data(Qt.ItemDataRole.UserRole)
-                == person_id
+            item = self.table.item(row, 4)
+            if item is not None and (
+                normalize_id(item.data(Qt.ItemDataRole.UserRole) or "") == target
+                or normalize_id(item.text() or "") == target
             ):
                 self.table.selectRow(row)
                 return

@@ -38,9 +38,7 @@ class StarRating(QWidget):
 
     changed = pyqtSignal(int)
 
-    def __init__(
-        self, editable: bool = True, point_size: int = 16, parent=None
-    ):
+    def __init__(self, editable: bool = True, point_size: int = 16, parent=None):
         super().__init__(parent)
         self.editable = editable
         self._rating = 0
@@ -52,7 +50,7 @@ class StarRating(QWidget):
         for _ in range(5):
             star = QLabel(STAR_EMPTY)
             font = star.font()
-            font.setPointSize(point_size)
+            font.setPointSize(max(1, int(point_size)))
             star.setFont(font)
             if editable:
                 star.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -75,8 +73,7 @@ class StarRating(QWidget):
         for i, star in enumerate(self._stars):
             star.setText(STAR_FULL if i < lit else STAR_EMPTY)
             star.setStyleSheet(
-                "color: %s;"
-                % (shades["star"] if i < lit else shades["star_empty"])
+                "color: %s;" % (shades["star"] if i < lit else shades["star_empty"])
             )
 
     def eventFilter(self, obj, event):
@@ -170,11 +167,7 @@ class BookCard(QFrame):
     def _one_line(self) -> str:
         author = self.book.authors.strip()
         title = self.book.title.strip()
-        return (
-            f"{author} - {title}"
-            if author and title
-            else (title or author)
-        )
+        return f"{author} - {title}" if author and title else (title or author)
 
     def _show_rating(self) -> None:
         stars = parse_rating(self.book.rating)

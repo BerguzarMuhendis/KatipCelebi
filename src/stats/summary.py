@@ -50,11 +50,7 @@ RECENT_WINDOWS = (WINDOW_YEAR, WINDOW_MONTH)
 
 def _finished(books: list[Book]) -> list[Book]:
     """Books that were actually finished, and say when."""
-    return [
-        b
-        for b in books
-        if status_of(b) == READ and parse_stamp(b.finished_date)
-    ]
+    return [b for b in books if status_of(b) == READ and parse_stamp(b.finished_date)]
 
 
 def counts_by_status(books: list[Book]) -> dict:
@@ -70,11 +66,7 @@ def counts_by_status(books: list[Book]) -> dict:
 
 def finished_in_year(books: list[Book], year: int) -> int:
     return len(
-        [
-            b
-            for b in _finished(books)
-            if parse_stamp(b.finished_date).year == year
-        ]
+        [b for b in _finished(books) if parse_stamp(b.finished_date).year == year]
     )
 
 
@@ -96,9 +88,7 @@ def average_days_to_finish(books: list[Book]) -> float | None:
     has no span, and counting it as zero would flatter the average.
     """
     spans = [
-        days
-        for days in (reading_days(b) for b in _finished(books))
-        if days is not None
+        days for days in (reading_days(b) for b in _finished(books)) if days is not None
     ]
     return sum(spans) / len(spans) if spans else None
 
@@ -182,17 +172,11 @@ class Goal:
         return min(1.0, self.done / self.target)
 
 
-def year_goal(
-    books: list[Book], target: int, today: date | None = None
-) -> Goal:
+def year_goal(books: list[Book], target: int, today: date | None = None) -> Goal:
     today = today or datetime.now().date()  # noqa: DTZ005 - wall-clock, like the stamps
     return Goal(target=target, done=finished_in_year(books, today.year))
 
 
-def month_goal(
-    books: list[Book], target: int, today: date | None = None
-) -> Goal:
+def month_goal(books: list[Book], target: int, today: date | None = None) -> Goal:
     today = today or datetime.now().date()  # noqa: DTZ005 - wall-clock, like the stamps
-    return Goal(
-        target=target, done=finished_in_month(books, today.year, today.month)
-    )
+    return Goal(target=target, done=finished_in_month(books, today.year, today.month))

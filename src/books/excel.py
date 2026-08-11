@@ -120,9 +120,7 @@ def export_library(books: list[Book], ledger, path: Path) -> bool:
     sheet = book.active
     sheet.title = text("nav_library")[:31]
 
-    headings = [field_label("isbn")] + [
-        field_label(name) for name in EXPORTED_FIELDS
-    ]
+    headings = [field_label("isbn")] + [field_label(name) for name in EXPORTED_FIELDS]
     headings += [text("export_days"), text("export_lent_to")]
     for column, heading in enumerate(headings, start=1):
         cell = sheet.cell(row=1, column=column, value=heading)
@@ -178,9 +176,7 @@ def _column_value(entry: Book, name: str):
         # The words as the app has been showing them, not as it files them.
         return tags.show(entry.tags)
     if name == "signed":
-        return (
-            text("export_yes") if entry.signed.strip() else text("export_no")
-        )
+        return text("export_yes") if entry.signed.strip() else text("export_no")
     return getattr(entry, name)
 
 

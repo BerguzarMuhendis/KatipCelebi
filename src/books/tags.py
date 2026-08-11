@@ -205,9 +205,7 @@ def _heading(subject: str) -> str:
     Fiction" is a novel about traffic accidents, and "-- Fiction" only repeats
     what the shelf already knows.
     """
-    return (
-        subject.split("--")[0].strip() if "--" in subject else subject.strip()
-    )
+    return subject.split("--")[0].strip() if "--" in subject else subject.strip()
 
 
 def _clean(subject: str) -> str:

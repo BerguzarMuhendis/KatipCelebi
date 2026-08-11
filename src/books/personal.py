@@ -120,9 +120,7 @@ class PersonalPanel(QWidget):
         book = self.library.find(self.key)
         if book is None:
             return
-        if not self._keep(
-            replace(book, signed=SIGNED_VALUE if ticked else "")
-        ):
+        if not self._keep(replace(book, signed=SIGNED_VALUE if ticked else "")):
             self.signed_check.blockSignals(True)
             self.signed_check.setChecked(is_signed(book))
             self.signed_check.blockSignals(False)
@@ -150,15 +148,11 @@ class PersonalPanel(QWidget):
         """The sentence about where the book is, and what the button offers."""
         status = status_of(book)
         if status == "reading" and book.started_date:
-            said = text("reading_since").format(
-                date=as_date(book.started_date)
-            )
+            said = text("reading_since").format(date=as_date(book.started_date))
         elif status == READ and book.finished_date:
             span = reading_days(book)
             said = (
-                text("reading_finished_on").format(
-                    date=as_date(book.finished_date)
-                )
+                text("reading_finished_on").format(date=as_date(book.finished_date))
                 if span is None
                 else text("reading_finished").format(
                     date=as_date(book.finished_date),
@@ -180,11 +174,7 @@ class PersonalPanel(QWidget):
         book = self.library.find(self.key)
         if book is None:
             return
-        moved = (
-            finish_reading(book)
-            if next_step(book) == READ
-            else start_reading(book)
-        )
+        moved = finish_reading(book) if next_step(book) == READ else start_reading(book)
         if self._keep(moved):
             self._show_status(moved)
             self._refresh_reading(moved)
@@ -199,9 +189,7 @@ class PersonalPanel(QWidget):
         book = self.library.find(self.key)
         if book is None:
             return
-        moved = replace(
-            book, status=self.status_combo.currentData() or NOT_READ
-        )
+        moved = replace(book, status=self.status_combo.currentData() or NOT_READ)
         if self._keep(moved):
             self._refresh_reading(moved)
         else:

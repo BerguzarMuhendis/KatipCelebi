@@ -115,9 +115,7 @@ class BookDetail(QWidget):
         middle.addStretch(1)
         body = QWidget()
         body.setMaximumWidth(PAGE_WIDTH)
-        body.setSizePolicy(
-            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding
-        )
+        body.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         middle.addWidget(body, 0)
         middle.addStretch(1)
         outer.addLayout(middle, 1)
@@ -160,9 +158,7 @@ class BookDetail(QWidget):
         column.addWidget(self.facts)
         column.addStretch(1)
 
-        self.delete_button = dress(
-            QPushButton(text("delete_book")), "delete_book"
-        )
+        self.delete_button = dress(QPushButton(text("delete_book")), "delete_book")
         self.delete_button.setObjectName("dangerButton")
         self.delete_button.clicked.connect(self._delete)
 
@@ -197,21 +193,15 @@ class BookDetail(QWidget):
         if book.copy_count > 1:
             self._delete_some(book)
             return
-        if self._confirmed(
-            book, text("delete_confirm").format(title=book.title)
-        ):
+        if self._confirmed(book, text("delete_confirm").format(title=book.title)):
             self._remove_whole(book)
 
     def _delete_some(self, book: Book) -> None:
         """Owning several, "delete" is genuinely two different wishes."""
         box = QMessageBox(self)
         box.setWindowTitle(text("delete_title"))
-        box.setText(
-            text("delete_which").format(title=book.title, n=book.copy_count)
-        )
-        one = box.addButton(
-            text("delete_one_copy"), QMessageBox.ButtonRole.AcceptRole
-        )
+        box.setText(text("delete_which").format(title=book.title, n=book.copy_count))
+        one = box.addButton(text("delete_one_copy"), QMessageBox.ButtonRole.AcceptRole)
         every = box.addButton(
             text("delete_all_copies").format(n=book.copy_count),
             QMessageBox.ButtonRole.DestructiveRole,

@@ -163,10 +163,6 @@ class LibraryPage(QWidget):
         self.title_label.setObjectName("pageTitle")
         layout.addWidget(self.title_label)
 
-        self.count_label = QLabel()
-        self.count_label.setObjectName("pageSubtitle")
-        layout.addWidget(self.count_label)
-
         search_row = QHBoxLayout()
         search_row.setSpacing(6)
         self.search_edit = QLineEdit()
@@ -175,15 +171,31 @@ class LibraryPage(QWidget):
         self.search_edit.setClearButtonEnabled(True)
         self.search_edit.textChanged.connect(self.refresh_view)
         search_row.addWidget(self.search_edit, 1)
-        # Beside the box rather than in the filter row: it is part of the
-        # question being typed, not another way of narrowing the answer.
         self.search_field_combo = QComboBox()
         for field in SEARCH_FIELDS:
             self.search_field_combo.addItem(text("search_in_" + field), field)
         self.search_field_combo.currentIndexChanged.connect(self.refresh_view)
         search_row.addWidget(self.search_field_combo)
         layout.addLayout(search_row)
-        layout.addWidget(self._filter_row())
+
+        self.advanced_toggle = QPushButton(text("advanced_search") + " ▸")
+        self.advanced_toggle.setCheckable(True)
+        self.advanced_toggle.setFlat(True)
+        self.advanced_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.advanced_toggle.toggled.connect(self._toggle_advanced_search)
+        layout.addWidget(self.advanced_toggle, 0, Qt.AlignmentFlag.AlignLeft)
+
+        self.advanced_panel = QWidget()
+        self.advanced_panel.setVisible(False)
+        advanced_inner = QVBoxLayout(self.advanced_panel)
+        advanced_inner.setContentsMargins(0, 0, 0, 0)
+        advanced_inner.setSpacing(6)
+        advanced_inner.addWidget(self._filter_row())
+        layout.addWidget(self.advanced_panel)
+
+        self.count_label = QLabel()
+        self.count_label.setObjectName("pageSubtitle")
+        layout.addWidget(self.count_label)
 
         self.empty_label = QLabel()
         self.empty_label.setObjectName("emptyLabel")
@@ -216,9 +228,7 @@ class LibraryPage(QWidget):
         "Sort:" at the end of a line.
         """
         host = QWidget()
-        host.setSizePolicy(
-            QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum
-        )
+        host.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum)
         policy = host.sizePolicy()
         policy.setHeightForWidth(True)
         host.setSizePolicy(policy)
@@ -287,15 +297,28 @@ class LibraryPage(QWidget):
 
         self.clear_button = QPushButton(text("clear_filters"))
         self.clear_button.clicked.connect(self.clear_filters)
-        self.export_button = dress(
-            QPushButton(text("export_button")), "export_button"
-        )
+        self.export_button = dress(QPushButton(text("export_button")), "export_button")
         self.export_button.clicked.connect(self._export)
         row.addWidget(self.export_button)
         # No stretch before it: FlowLayout walks item.widget() on every item,
         # and a spacer has none.
         row.addWidget(self.clear_button)
         return host
+
+    def _toggle_advanced_search(self, expanded: bool) -> None:
+        self.advanced_panel.setVisible(expanded)
+        self.advanced_toggle.setText(
+            text("advanced_search") if not expanded else text("advanced_search")
+        )
+        if expanded:
+            self.advanced_toggle.setText(f"{text('advanced_search')} ▾")
+        else:
+            self.advanced_toggle.setText(f"{text('advanced_search')} ▸")
+
+    def _toggle_advanced_search(self, expanded: bool) -> None:
+        self.advanced_panel.setVisible(expanded)
+        label = text("advanced_search")
+        self.advanced_toggle.setText(f"{label} {'▾' if expanded else '▸'}")
 
     def _sort_dir_changed(self, descending: bool) -> None:
         self.sort_dir_button.setText(
@@ -428,11 +451,7 @@ class LibraryPage(QWidget):
         descending = self.sort_dir_button.isChecked()
 
         ledger = self.main_window.ledger
-        keep = [
-            b
-            for b in self._books
-            if filters.allows(b, ledger.is_lent_out(b.key))
-        ]
+        keep = [b for b in self._books if filters.allows(b, ledger.is_lent_out(b.key))]
         kept_keys = {b.key for b in keep}
 
         # Taken out and re-added in order: FlowLayout draws them in the order
@@ -474,6 +493,4 @@ class LibraryPage(QWidget):
 
     def visible_titles(self) -> list[str]:
         """What the user can actually see. Here for the tests to ask."""
-        return sorted(
-            c.book.title for c in self.cards.values() if not c.isHidden()
-        )
+        return sorted(c.book.title for c in self.cards.values() if not c.isHidden())

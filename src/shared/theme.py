@@ -40,23 +40,17 @@ from shared import palette, shape
 DARK = "dark"
 LIGHT = "light"
 
-# The six themes, and the family each belongs to. The two M3 themes are the
-# app's own Material look: our stylesheet, built from the desktop's accent. The
-# two Adwaita themes use adwaita-qt to draw native GNOME widgets -- our
-# stylesheet is taken off and the platform's own widget style is left to draw,
-# so on a GNOME desktop the app looks like a GNOME app rather than like itself.
-# The "system" theme follows the desktop's light/dark preference using the
-# native style -- per GNOME HIG, apps should offer light, dark, and
-# follow-system as the three standard options.  "Custom" loads the user's own
-# QSS file from the app data directory.
-M3_LIGHT = "m3-light"
-M3_DARK = "m3-dark"
-ADWAITA_LIGHT = "adwaita-light"
-ADWAITA_DARK = "adwaita-dark"
-SYSTEM = "system"
+# The built-in themes, plus the retained custom QSS override.
+# "Fluent" keeps the app's own stylesheet; "Contrast" keeps the same layout
+# but swaps in a stronger light/dark contrast palette. "Custom" loads the
+# user's own QSS file from the app data directory.
+FLUENT_LIGHT = "fluent-light"
+FLUENT_DARK = "fluent-dark"
+CONTRAST_LIGHT = "contrast-light"
+CONTRAST_DARK = "contrast-dark"
 CUSTOM = "custom"
-THEMES = (M3_LIGHT, M3_DARK, ADWAITA_LIGHT, ADWAITA_DARK, SYSTEM, CUSTOM)
-DEFAULT_THEME = M3_DARK
+THEMES = (FLUENT_LIGHT, FLUENT_DARK, CONTRAST_LIGHT, CONTRAST_DARK, CUSTOM)
+DEFAULT_THEME = FLUENT_DARK
 
 # GNOME's own chart palette, for the pie wedges when a native theme is on: five
 # hues from the standard GNOME colour palette, a touch lighter in the dark.
@@ -85,9 +79,9 @@ def is_dark(name: str) -> bool:
 def family(name: str) -> str:
     if name == CUSTOM:
         return "custom"
-    if name.startswith("adwaita") or name == SYSTEM:
-        return "adwaita"
-    return "m3"
+    if name.startswith("contrast"):
+        return "contrast"
+    return "fluent"
 
 
 def colours() -> dict:
@@ -119,11 +113,10 @@ def current_seed() -> str:
 # small swatch so the user can tell themes apart at a glance.  Each tuple is
 # (background, accent, text).
 _PREVIEW_COLOURS = {
-    M3_LIGHT: ("#fef7ff", "#6750a4", "#1d1b20"),
-    M3_DARK: ("#141218", "#d0bcff", "#e6e0e9"),
-    ADWAITA_LIGHT: ("#ffffff", "#3584e4", "#000000"),
-    ADWAITA_DARK: ("#241f31", "#62a0ea", "#ffffff"),
-    SYSTEM: ("#241f31", "#3584e4", "#ffffff"),
+    FLUENT_LIGHT: ("#f5f5f5", "#0078d4", "#1f1f1f"),
+    FLUENT_DARK: ("#1b1b1b", "#5aa7ff", "#f5f5f5"),
+    CONTRAST_LIGHT: ("#ffffff", "#0b57d0", "#000000"),
+    CONTRAST_DARK: ("#000000", "#8ab4f8", "#ffffff"),
     CUSTOM: ("#f0f0f0", "#0078d7", "#000000"),
 }
 
@@ -165,40 +158,54 @@ def system_prefers_dark(app) -> bool:
 
 
 def apply_theme(app, name: str) -> str:
-    """Dress the whole app in one of the five themes. Returns the name used.
+    """Dress the whole app in one of the supported themes.
 
-    M3 is our stylesheet over the platform's widget style. Adwaita is the
-    opposite: the stylesheet comes off and the platform style draws, so on
-    GNOME the app looks like a GNOME app. The "system" theme follows the
-    desktop's own light/dark preference using the native style, per GNOME HIG
-    guidelines. Either way the charts and covers -- which paint themselves --
-    are handed the colours that ended up in force, so nothing is left the wrong
-    colour.
+    The default and the contrast themes follow the same app stylesheet, with a
+    stronger contrast palette for the contrast variants. Custom QSS remains as a
+    separate override that can still layer on top of the chosen theme.
     """
     global _current, _family, _shades
     if name not in THEMES:
         name = DEFAULT_THEME
     _capture(app)
-    if name == SYSTEM:
-        _current = DARK if system_prefers_dark(app) else LIGHT
-    elif name == CUSTOM:
-        _current = DARK if is_dark(name) else LIGHT
-    else:
-        _current = DARK if is_dark(name) else LIGHT
+    _current = DARK if is_dark(name) else LIGHT
     _family = family(name)
     if _family == "custom":
         _wear_custom(app)
-    elif _family == "adwaita":
-        _shades = _wear_native(app, _current == DARK)
+    elif _family == "contrast":
+        _wear_contrast(app, _current == DARK)
     else:
         _wear_m3(app, _current == DARK)
     return name
 
 
+def _wear_contrast(app, dark: bool) -> None:
+    """Strong light/dark contrast while keeping the app's own shell."""
+    global _seed, _shades
+    _restore_platform_style(app)
+    _seed = _system_seed or palette.DEFAULT_SEED
+    _shades = palette.build(_seed, dark=dark)
+    _shades["window"] = "#000000" if dark else "#ffffff"
+    _shades["sidebar"] = "#111111" if dark else "#f3f3f3"
+    _shades["panel"] = "#121212" if dark else "#fafafa"
+    _shades["border"] = "#7a7a7a" if dark else "#d1d1d1"
+    _shades["text"] = "#ffffff" if dark else "#1c1c1c"
+    _shades["text_body"] = _shades["text"]
+    _shades["text_soft"] = "#cfcfcf" if dark else "#525252"
+    _shades["accent"] = "#8ab4f8" if dark else "#0b57d0"
+    _shades["accent_text"] = "#000000" if dark else "#ffffff"
+    _shades["secondary_container"] = "#2d2d2d" if dark else "#eef3ff"
+    _shades["on_secondary_container"] = "#ffffff" if dark else "#0b57d0"
+    _shades["surface_container"] = "#1a1a1a" if dark else "#f6f6f6"
+    _shades["surface_container_high"] = "#202020" if dark else "#ffffff"
+    _shades["outline"] = _shades["border"]
+    app.setStyleSheet(stylesheet())
+
+
 # ------------------------------------------------------------ custom QSS ---
 def _wear_custom(app) -> None:
-    """Apply the user's custom QSS file.  Falls back to M3 dark if the file
-    does not exist or cannot be read."""
+    """Apply the user's custom QSS file. Falls back to the Fluent dark theme
+    if the file does not exist or cannot be read."""
     global _seed, _shades
     qss = load_custom_qss()
     if qss:
@@ -207,7 +214,7 @@ def _wear_custom(app) -> None:
         _shades = palette.build(_seed, dark=True)
         app.setStyleSheet(qss)
     else:
-        logger.warning("Custom QSS not found; falling back to M3 dark")
+        logger.warning("Custom QSS not found; falling back to Fluent dark")
         _wear_m3(app, True)
 
 
@@ -226,6 +233,7 @@ def _qss_styles_dir() -> _Path:
 def _qss_user_path() -> _Path:
     """The user's custom QSS file in the app data directory."""
     from shared.paths import app_data_dir
+
     return app_data_dir() / "custom.qss"
 
 
@@ -284,7 +292,9 @@ def _capture(app) -> None:
     if _platform_style is None:
         try:
             _platform_style = app.style().name()
-        except Exception:  # noqa: BLE001 - pragma: no cover - a Qt without QStyle.name()
+        except (
+            Exception
+        ):  # noqa: BLE001 - pragma: no cover - a Qt without QStyle.name()
             _platform_style = ""
         _system_seed = palette.system_seed(app)
 
@@ -295,6 +305,38 @@ def _wear_m3(app, dark: bool) -> None:
     _restore_platform_style(app)  # undo any native restyle first
     _seed = _system_seed or palette.DEFAULT_SEED
     _shades = palette.build(_seed, dark=dark)
+
+    if dark:
+        _shades["window"] = "#1b1a19"
+        _shades["sidebar"] = "#1f1f1f"
+        _shades["panel"] = "#2b2b2b"
+        _shades["border"] = "#3a3a3a"
+        _shades["text"] = "#f3f2f1"
+        _shades["text_body"] = "#f3f2f1"
+        _shades["text_soft"] = "#d1d1d1"
+        _shades["accent"] = "#60a5fa"
+        _shades["accent_text"] = "#08131d"
+        _shades["secondary_container"] = "#2d2d2d"
+        _shades["on_secondary_container"] = "#f3f2f1"
+        _shades["surface_container"] = "#1f1f1f"
+        _shades["surface_container_high"] = "#2b2b2b"
+        _shades["outline"] = "#4b4b4b"
+    else:
+        _shades["window"] = "#f3f2f1"
+        _shades["sidebar"] = "#f5f5f5"
+        _shades["panel"] = "#ffffff"
+        _shades["border"] = "#d1d1d1"
+        _shades["text"] = "#201f1e"
+        _shades["text_body"] = "#201f1e"
+        _shades["text_soft"] = "#5c5c5c"
+        _shades["accent"] = "#0078d4"
+        _shades["accent_text"] = "#ffffff"
+        _shades["secondary_container"] = "#eef5ff"
+        _shades["on_secondary_container"] = "#004578"
+        _shades["surface_container"] = "#ffffff"
+        _shades["surface_container_high"] = "#f5f5f5"
+        _shades["outline"] = "#d1d1d1"
+
     app.setStyleSheet(stylesheet())
 
 
@@ -518,18 +560,13 @@ _TEMPLATE = """
 QWidget {
     background: %(window)s;
     color: %(text_body)s;
-    font-size: %(t_body_lg)dpx;
+    font-family: "Segoe UI Variable", "Segoe UI", sans-serif;
+    font-size: 14px;
+    selection-background-color: %(accent)s;
+    selection-color: %(accent_text)s;
 }
-/* A label paints no background of its own: it shows whatever it sits on. The
-   base rule above would otherwise have every label paint the window colour,
-   which on a card -- a surface a shade lighter -- left the number and its
-   caption on a mismatched panel the shape of the text. */
 QLabel { background: transparent; }
 
-/* ---------------------------------------------------------------- fields ---
-   M3 outlined text field: a one-pixel outline that thickens to two in the
-   primary colour when it has focus, on a corner softer than a box but far
-   short of the pill the buttons wear. */
 QLineEdit, QTextEdit, QComboBox, QSpinBox {
     background: %(window)s;
     border: 1px solid %(outline)s;
@@ -537,44 +574,37 @@ QLineEdit, QTextEdit, QComboBox, QSpinBox {
     selection-background-color: %(accent)s;
     selection-color: %(accent_text)s;
 }
-/* Single-line controls wear the same pill as the buttons, at the same 40px
-   height: a dropdown sitting in a row of buttons should read as one family,
-   not a box left over from before. */
 QLineEdit, QComboBox {
-    border-radius: %(r_pill)dpx;
-    min-height: 22px;
-    padding: 9px 18px;
+    border-radius: 8px;
+    min-height: 32px;
+    padding: 7px 12px;
 }
 QLineEdit:focus, QComboBox:focus, QComboBox:on {
-    border: 2px solid %(accent)s;
-    padding: 8px 17px;   /* the extra border pixel, taken from the padding */
+    border: 1px solid %(accent)s;
+    padding: 7px 12px;
 }
-/* The two a pill would spoil: a spin box keeps its up/down arrows in the very
-   corners a pill would round away, and the notes box is many lines tall. Both
-   take the largest rounded rectangle instead, which still belongs to the same
-   family. */
 QSpinBox {
-    border-radius: %(r_lg)dpx;
-    min-height: 22px;
-    padding: 9px 12px;
+    border-radius: 8px;
+    min-height: 32px;
+    padding: 7px 10px;
 }
 QTextEdit {
-    border-radius: %(r_lg)dpx;
+    border-radius: 10px;
     padding: 8px 12px;
 }
-QSpinBox:focus { border: 2px solid %(accent)s; padding: 8px 11px; }
-QTextEdit:focus { border: 2px solid %(accent)s; padding: 7px 11px; }
+QSpinBox:focus { border: 1px solid %(accent)s; padding: 7px 10px; }
+QTextEdit:focus { border: 1px solid %(accent)s; padding: 7px 11px; }
 QComboBox::drop-down {
     border: none;
-    width: 28px;
+    width: 22px;
     subcontrol-origin: padding;
     subcontrol-position: center right;
 }
-QComboBox::down-arrow { image: url(%(chevron)s); width: 20px; height: 20px; }
+QComboBox::down-arrow { image: url(%(chevron)s); width: 16px; height: 16px; }
 QComboBox QAbstractItemView {
     background: %(surface_container_high)s;
-    border: none;
-    border-radius: %(r_sm)dpx;
+    border: 1px solid %(outline)s;
+    border-radius: 8px;
     color: %(text_body)s;
     outline: none;
     padding: 4px;
@@ -587,38 +617,41 @@ QSpinBox::up-button, QSpinBox::down-button {
     width: 20px;
 }
 
-/* --------------------------------------------------------------- buttons ---
-   Every ordinary button is a filled-tonal pill -- M3's calm, in-family fill.
-   The one main action per screen is filled in the primary colour instead, and
-   the delete button is text only: an action that undoes nothing should be
-   findable, not inviting. */
 QPushButton {
-    background: %(secondary_container)s;
-    border: none;
-    border-radius: %(r_pill)dpx;
-    color: %(on_secondary_container)s;
-    font-weight: %(w_medium)d;
-    min-height: 22px;   /* 22 + 2*9 padding = 40px, met by the 20px radius */
-    padding: 9px 22px;
+    background: %(surface_container)s;
+    border: 1px solid %(outline)s;
+    border-radius: 8px;
+    color: %(text_body)s;
+    font-weight: 600;
+    min-height: 32px;
+    padding: 7px 16px;
 }
-QPushButton:hover { background: %(tonal_hover)s; }
-QPushButton:pressed { background: %(tonal_press)s; }
+QPushButton:hover {
+    background: %(secondary_container)s;
+    border-color: %(accent)s;
+}
+QPushButton:pressed {
+    background: %(surface_container_high)s;
+    border-color: %(accent)s;
+}
 QPushButton:disabled {
     background: %(surface_container)s;
     color: %(text_soft)s;
 }
 #primaryButton, QPushButton:default {
     background: %(accent)s;
+    border: 1px solid %(accent)s;
     color: %(accent_text)s;
 }
 #primaryButton:hover, QPushButton:default:hover {
-    background: %(filled_hover)s;
+    background: #0f6cbd;
 }
 #primaryButton:pressed, QPushButton:default:pressed {
-    background: %(filled_press)s;
+    background: #0b5ea8;
 }
 #dangerButton {
     background: transparent;
+    border-color: %(danger)s;
     color: %(danger)s;
 }
 #dangerButton:hover { background: %(danger_hover)s; }
@@ -679,28 +712,33 @@ QScrollBar::add-page, QScrollBar::sub-page { background: none; }
    highlight was standing in for. */
 #sidebar {
     background: %(sidebar)s;
-    border: none;
+    border: 1px solid %(outline)s;
+    border-left: none;
 }
 #brandLabel {
     color: %(text)s;
-    font-size: %(t_title_lg)dpx;
-    font-weight: %(w_bold)d;
+    font-size: 18px;
+    font-weight: 600;
 }
 #navButton {
     background: transparent;
-    border: none;
-    border-radius: %(r_pill)dpx;
+    border: 1px solid transparent;
+    border-radius: 8px;
     color: %(text_soft)s;
-    font-weight: %(w_medium)d;
+    font-weight: 600;
     min-height: 20px;
-    padding: 10px 18px;
+    padding: 10px 14px;
     text-align: left;
 }
-#navButton:hover { background: %(nav_hover)s; color: %(text)s; }
+#navButton:hover {
+    background: rgba(0, 120, 212, 0.08);
+    color: %(text)s;
+}
 #navButton:checked {
-    background: %(secondary_container)s;
-    color: %(on_secondary_container)s;
-    font-weight: %(w_bold)d;
+    background: rgba(0, 120, 212, 0.12);
+    color: %(text)s;
+    font-weight: 700;
+    border: 1px solid rgba(0, 120, 212, 0.22);
 }
 
 /* ------------------------------------------------------------------ pages ---

@@ -76,9 +76,7 @@ def files_in(folder: Path) -> list:
 def _movable(src: Path) -> list:
     names = [name for name in DATA_FILENAMES if (src / name).exists()]
     for pattern in EXTRA_PATTERNS:
-        names += [
-            p.name for p in sorted(src.glob(pattern)) if p.name not in names
-        ]
+        names += [p.name for p in sorted(src.glob(pattern)) if p.name not in names]
     return names
 
 

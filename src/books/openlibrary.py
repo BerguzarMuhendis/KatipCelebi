@@ -69,9 +69,7 @@ def _get_json(url: str) -> Any:
     missing book.
     """
     try:
-        request = urllib.request.Request(
-            url, headers={"User-Agent": USER_AGENT}
-        )
+        request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
         with urllib.request.urlopen(request, timeout=TIMEOUT) as reply:
             return json.loads(reply.read().decode("utf-8"))
     except (
@@ -101,9 +99,7 @@ def _text(value: Any) -> str:
     if isinstance(value, dict):
         return str(value.get("value", "")).strip()
     if isinstance(value, list):
-        return ", ".join(
-            part for part in (_text(item) for item in value) if part
-        )
+        return ", ".join(part for part in (_text(item) for item in value) if part)
     return ""
 
 
@@ -117,11 +113,7 @@ def _string_list(value: Any) -> list[str]:
     """
     if not isinstance(value, list):
         return []
-    return [
-        item.strip()
-        for item in value
-        if isinstance(item, str) and item.strip()
-    ]
+    return [item.strip() for item in value if isinstance(item, str) and item.strip()]
 
 
 def _dict_list(value: Any) -> list[dict]:
@@ -228,9 +220,7 @@ def _edition(book: Book) -> dict:
     }
     if book.authors.strip():
         edition["authors"] = [
-            {"name": name.strip()}
-            for name in book.authors.split(",")
-            if name.strip()
+            {"name": name.strip()} for name in book.authors.split(",") if name.strip()
         ]
     if book.publishers.strip():
         edition["publishers"] = [
@@ -268,9 +258,7 @@ def submit_book(book: Book, username: str, password: str) -> str:
     import http.cookiejar
 
     jar = http.cookiejar.CookieJar()
-    opener = urllib.request.build_opener(
-        urllib.request.HTTPCookieProcessor(jar)
-    )
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
 
     try:
         _post(
@@ -328,15 +316,11 @@ def fetch_cover(isbn: str, size: str = COVER_SIZE_THUMB) -> bytes | None:
             if data:
                 return data
         except OSError:
-            logger.debug(
-                "Could not read the cached cover %s", cached, exc_info=True
-            )
+            logger.debug("Could not read the cached cover %s", cached, exc_info=True)
 
     url = f"{COVERS_ROOT}{key}-{size}.jpg?default=false"
     try:
-        request = urllib.request.Request(
-            url, headers={"User-Agent": USER_AGENT}
-        )
+        request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
         with urllib.request.urlopen(request, timeout=TIMEOUT) as reply:
             data = reply.read()
     except (
@@ -352,9 +336,7 @@ def fetch_cover(isbn: str, size: str = COVER_SIZE_THUMB) -> bytes | None:
         # A 200 that isn't a picture: a captive portal, a rate-limit notice.
         # Caching it would break that book's cover for good, because the cache
         # hit means the real one is never asked for again.
-        logger.debug(
-            "The cover reply for %s is not an image; not caching it", key
-        )
+        logger.debug("The cover reply for %s is not an image; not caching it", key)
         return None
 
     try:

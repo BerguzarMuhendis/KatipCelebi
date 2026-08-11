@@ -128,9 +128,7 @@ class CoverLoader:
     def forget(self, key: str) -> None:
         """Drop a cover so it is fetched afresh (the book's ISBN changed)."""
         self._asked = {(k, s) for (k, s) in self._asked if k != key}
-        self._images = {
-            (k, s): img for (k, s), img in self._images.items() if k != key
-        }
+        self._images = {(k, s): img for (k, s), img in self._images.items() if k != key}
 
 
 def _device_ratio() -> float:

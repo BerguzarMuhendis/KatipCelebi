@@ -99,9 +99,7 @@ def save(username: str, password: str) -> bool:
         )
         return True
     except Exception:
-        logger.warning(
-            "Could not write to the credential store", exc_info=True
-        )
+        logger.warning("Could not write to the credential store", exc_info=True)
         return False
 
 
@@ -113,6 +111,4 @@ def forget() -> None:
         _KEYRING.delete_password(SERVICE, ACCOUNT)
     except Exception:
         # Nothing there to delete, most likely. Not worth troubling anyone.
-        logger.debug(
-            "Nothing to forget in the credential store", exc_info=True
-        )
+        logger.debug("Nothing to forget in the credential store", exc_info=True)

@@ -172,9 +172,7 @@ def build(seed: str, dark: bool) -> dict:
     """Every colour the app uses, from one seed."""
     scheme = SchemeTonalSpot(_hct(seed), dark, 0.0, spec_version=SPEC)
     return {
-        name: _hex(
-            getattr(MaterialDynamicColors, role).get_hct(scheme).to_int()
-        )
+        name: _hex(getattr(MaterialDynamicColors, role).get_hct(scheme).to_int())
         for name, role in ROLES.items()
     }
 
@@ -185,10 +183,6 @@ def slices(seed: str, dark: bool) -> tuple:
     tone = SLICE_TONE_DARK if dark else SLICE_TONE_LIGHT
     step = 360.0 / SLICE_COUNT
     return tuple(
-        _hex(
-            Hct.from_hct(
-                (start + step * n) % 360.0, SLICE_CHROMA, tone
-            ).to_int()
-        )
+        _hex(Hct.from_hct((start + step * n) % 360.0, SLICE_CHROMA, tone).to_int())
         for n in range(SLICE_COUNT)
     )

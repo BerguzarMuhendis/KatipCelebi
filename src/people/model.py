@@ -23,10 +23,22 @@ holding the same fact is two places that can disagree, and the one that is
 wrong is always the one being read.
 """
 
-import uuid
+import secrets
+import string
 from dataclasses import asdict, dataclass, fields
 from datetime import datetime
 from typing import Any
+
+
+def normalize_id(value: str | None) -> str:
+    """IDs are shown and compared in uppercase so the UI stays consistent."""
+    text = (value or "").upper().strip()
+    if len(text) == 9 and text[4] == "-":
+        return text
+    parts = [part for part in text.replace("-", "") if part.isalnum()]
+    if len(parts) >= 8:
+        return f"{''.join(parts[:4])}-{''.join(parts[4:8])}"
+    return text
 
 
 def now() -> str:
@@ -53,7 +65,10 @@ class Person:
 
     @staticmethod
     def new_id() -> str:
-        return uuid.uuid4().hex[:12]
+        alphabet = string.ascii_uppercase + string.digits
+        left = "".join(secrets.choice(alphabet) for _ in range(4))
+        right = "".join(secrets.choice(alphabet) for _ in range(4))
+        return normalize_id(f"{left}-{right}")
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -66,10 +81,10 @@ class Person:
             )
         known = {f.name for f in fields(cls)}
         values = {
-            k: ("" if v is None else str(v))
-            for k, v in data.items()
-            if k in known
+            k: ("" if v is None else str(v)) for k, v in data.items() if k in known
         }
+        if "id" in values:
+            values["id"] = normalize_id(values["id"])
         return cls(**values)
 
 
@@ -91,7 +106,10 @@ class Loan:
 
     @staticmethod
     def new_id() -> str:
-        return uuid.uuid4().hex[:12]
+        alphabet = string.ascii_uppercase + string.digits
+        left = "".join(secrets.choice(alphabet) for _ in range(4))
+        right = "".join(secrets.choice(alphabet) for _ in range(4))
+        return normalize_id(f"{left}-{right}")
 
     @property
     def is_open(self) -> bool:
@@ -104,15 +122,13 @@ class Loan:
     @classmethod
     def from_dict(cls, data: Any) -> "Loan":
         if not isinstance(data, dict):
-            raise TypeError(
-                f"a loan must be a JSON object, got {type(data).__name__}"
-            )
+            raise TypeError(f"a loan must be a JSON object, got {type(data).__name__}")
         known = {f.name for f in fields(cls)}
         values = {
-            k: ("" if v is None else str(v))
-            for k, v in data.items()
-            if k in known
+            k: ("" if v is None else str(v)) for k, v in data.items() if k in known
         }
+        if "id" in values:
+            values["id"] = normalize_id(values["id"])
         return cls(**values)
 
 
@@ -126,9 +142,7 @@ def open_loans_for(loans: list[Loan], book_key: str) -> list[Loan]:
     A book you own two of can be in two people's hands at once, so this is a
     list and not a single loan. It is empty for a book that is all here.
     """
-    return [
-        loan for loan in loans if loan.book_key == book_key and loan.is_open
-    ]
+    return [loan for loan in loans if loan.book_key == book_key and loan.is_open]
 
 
 def open_loan_for(loans: list[Loan], book_key: str) -> Loan | None:
@@ -164,9 +178,7 @@ def books_out_with(loans: list[Loan], person_id: str) -> list[Loan]:
 
 
 def returned_count(loans: list[Loan], person_id: str) -> int:
-    return len(
-        [loan for loan in loans_of(loans, person_id) if not loan.is_open]
-    )
+    return len([loan for loan in loans_of(loans, person_id) if not loan.is_open])
 
 
 def trust_score(loans: list[Loan], person_id: str) -> int:
@@ -176,6 +188,4 @@ def trust_score(loans: list[Loan], person_id: str) -> int:
     the history every time it is asked for, so it cannot drift away from what
     actually happened -- and correcting the history corrects the score.
     """
-    return returned_count(loans, person_id) - len(
-        books_out_with(loans, person_id)
-    )
+    return returned_count(loans, person_id) - len(books_out_with(loans, person_id))

@@ -47,9 +47,7 @@ class LendingPanel(QWidget):
 
     changed = pyqtSignal()
 
-    def __init__(
-        self, key: str, library: Library, ledger: Ledger, parent=None
-    ):
+    def __init__(self, key: str, library: Library, ledger: Ledger, parent=None):
         super().__init__(parent)
         self.key = key
         self.library = library
@@ -140,9 +138,7 @@ class LendingPanel(QWidget):
         inner = QHBoxLayout(row)
         inner.setContentsMargins(0, 0, 0, 0)
         who = QLabel(
-            text("out_with").format(
-                name=loan.person_name, date=as_date(loan.lent_date)
-            )
+            text("out_with").format(name=loan.person_name, date=as_date(loan.lent_date))
         )
         who.setWordWrap(True)
         inner.addWidget(who, 1)
@@ -162,11 +158,7 @@ class LendingPanel(QWidget):
         Empty when the rows already say it all.
         """
         if out == 0:
-            said = (
-                text("at_home")
-                if copies == 1
-                else text("all_here").format(n=copies)
-            )
+            said = text("at_home") if copies == 1 else text("all_here").format(n=copies)
         elif copies == 1:
             said = ""  # the single loan row already names who has it
         elif out == copies:

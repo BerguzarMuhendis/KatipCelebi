@@ -99,9 +99,7 @@ class SettingsPage(QWidget):
             Qt.TextInteractionFlag.TextSelectableByMouse
         )
         column.addWidget(self.folder_label)
-        self.move_button = dress(
-            QPushButton(text("settings_move")), "settings_move"
-        )
+        self.move_button = dress(QPushButton(text("settings_move")), "settings_move")
         self.move_button.clicked.connect(self.change_folder)
         column.addWidget(self.move_button, 0, Qt.AlignmentFlag.AlignLeft)
 
@@ -111,7 +109,6 @@ class SettingsPage(QWidget):
         self.theme_combo = QComboBox()
         self.theme_combo.setIconSize(QSize(20, 20))
         for name in THEMES:
-            # "m3-light" -> the key "theme_m3_light"; the two never drift.
             self.theme_combo.addItem(
                 theme_preview_pixmap(name),
                 text("theme_" + name.replace("-", "_")),
@@ -188,6 +185,18 @@ class SettingsPage(QWidget):
         )
         about_row.addWidget(self.about_label, 1)
         column.addLayout(about_row)
+
+        self.update_label = QLabel()
+        self.update_label.setObjectName("statusLabel")
+        self.update_label.setWordWrap(True)
+        column.addWidget(self.update_label)
+
+        update_row = QHBoxLayout()
+        self.update_button = QPushButton("Check for updates")
+        self.update_button.clicked.connect(self._check_updates)
+        update_row.addWidget(self.update_button)
+        update_row.addStretch(1)
+        column.addLayout(update_row)
         column.addStretch(1)
 
     def _build_seed(self, column) -> None:
@@ -213,8 +222,7 @@ class SettingsPage(QWidget):
         the desktop's accent.
         """
         return (
-            "<b>{0} {1}</b><br>{2}<br><br>"
-            '<a href="{3}" style="color: {4}">{3}</a>'
+            "<b>{0} {1}</b><br>{2}<br><br>" '<a href="{3}" style="color: {4}">{3}</a>'
         ).format(
             escape(text("app_name")),
             escape(APP_VERSION),
@@ -236,20 +244,19 @@ class SettingsPage(QWidget):
         self.theme_combo.blockSignals(True)
         self.theme_combo.setCurrentIndex(max(index, 0))
         self.theme_combo.blockSignals(False)
-        self.cache_label.setText(
-            text("settings_cache_size").format(mb=cache_size_mb())
-        )
-        # The colour section only applies to M3 themes — Adwaita uses its own
-        # palette, so hide it to avoid confusing the user.
-        is_m3 = family(config.theme()) == "m3"
-        self._colour_heading.setVisible(is_m3)
-        self.colour_label.setVisible(is_m3)
-        if is_m3:
+        self.cache_label.setText(text("settings_cache_size").format(mb=cache_size_mb()))
+        # The colour section only applies to the built-in Fluent/Contrast themes
+        # and not to the custom QSS override, which can use any palette.
+        is_built_in = family(config.theme()) in {"fluent", "contrast"}
+        self._colour_heading.setVisible(is_built_in)
+        self.colour_label.setVisible(is_built_in)
+        if is_built_in:
             self._show_colour()
         # The link is coloured by hand, so it does not follow the
         # stylesheet on its own.
         self.about_label.setText(self._about_text())
         self._show_qss()
+        self._update_status()
 
     # ------------------------------------------------------------- theme ---
     def _pick_theme(self, *_args) -> None:
@@ -282,15 +289,14 @@ class SettingsPage(QWidget):
     def _show_colour(self) -> None:
         seed = current_seed()
         key = (
-            "settings_colour_from_desktop"
-            if has_a_desktop()
-            else "settings_colour_own"
+            "settings_colour_from_desktop" if has_a_desktop() else "settings_colour_own"
         )
         self.colour_label.setText(text(key).format(colour=seed))
 
     # ------------------------------------------------------------ custom QSS -
     def _show_qss(self) -> None:
         from shared.theme import _qss_styles_dir, _qss_user_path
+
         user = _qss_user_path()
         if user.exists():
             self.qss_label.setText(str(user))
@@ -298,10 +304,43 @@ class SettingsPage(QWidget):
             default = _qss_styles_dir() / "default.qss"
             self.qss_label.setText(str(default))
 
+    def _update_status(self) -> None:
+        from shared.update import check_for_update
+
+        has_update, latest, release_url = check_for_update(APP_VERSION)
+        if has_update:
+            self.update_label.setText(
+                f"Update available: {latest}. Open {release_url} to download it."
+            )
+        else:
+            self.update_label.setText("You are using the latest version.")
+
+    def _check_updates(self) -> None:
+        from shared.update import check_for_update
+
+        has_update, latest, release_url = check_for_update(APP_VERSION)
+        if has_update:
+            self.update_label.setText(
+                f"Update available: {latest}. Open {release_url} to download it."
+            )
+            QMessageBox.information(
+                self,
+                "Update available",
+                f"A newer version ({latest}) is available.\n\n{release_url}",
+            )
+        else:
+            self.update_label.setText("You are using the latest version.")
+            QMessageBox.information(
+                self,
+                "Up to date",
+                "You are already using the latest version.",
+            )
+
     def _open_qss(self) -> None:
         import subprocess
 
         from shared.theme import _qss_styles_dir, _qss_user_path
+
         user = _qss_user_path()
         if not user.exists():
             # Copy the default to the user's data dir so they can edit it.
@@ -321,8 +360,10 @@ class SettingsPage(QWidget):
         from PyQt6.QtWidgets import QApplication
 
         from shared.theme import apply_theme
+
         apply_theme(QApplication.instance(), config.theme())
         from shared.icons import redress
+
         redress(self.main_window)
 
     # ------------------------------------------------------------- cache ---
@@ -385,9 +426,7 @@ class SettingsPage(QWidget):
             QMessageBox.critical(
                 self,
                 text("settings_move_failed_title"),
-                text("settings_move_failed").format(
-                    files="\n".join(result.failed)
-                ),
+                text("settings_move_failed").format(files="\n".join(result.failed)),
             )
             return
         self._point_at(new_folder)

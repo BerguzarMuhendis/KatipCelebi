@@ -52,9 +52,7 @@ def assets_dir() -> Path:
 def app_data_dir() -> Path:
     """The platform's own place for an app's settings."""
     if sys.platform == "win32":
-        base = os.environ.get("APPDATA") or (
-            Path.home() / "AppData" / "Roaming"
-        )
+        base = os.environ.get("APPDATA") or (Path.home() / "AppData" / "Roaming")
     elif sys.platform == "darwin":
         base = Path.home() / "Library" / "Application Support"
     else:

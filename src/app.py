@@ -95,9 +95,7 @@ class SetupPage(QWidget):
             max(0, self.language_combo.findData(texts.current()))
         )
         self.language_combo.activated.connect(
-            lambda: self.language_picked.emit(
-                self.language_combo.currentData()
-            )
+            lambda: self.language_picked.emit(self.language_combo.currentData())
         )
         lang_row.addWidget(self.language_combo)
         lang_row.addStretch(1)
@@ -146,9 +144,7 @@ class SetupPage(QWidget):
         self.browse.setText(text("setup_browse"))
         self.theme_heading.setText(text("settings_theme"))
         for index, name in enumerate(THEMES):
-            self.theme_combo.setItemText(
-                index, text("theme_" + name.replace("-", "_"))
-            )
+            self.theme_combo.setItemText(index, text("theme_" + name.replace("-", "_")))
         self.start_button.setText(text("setup_start"))
 
     def _choose(self) -> None:
@@ -291,11 +287,11 @@ class MainWindow(QMainWindow):
         self.settings_page.theme_changed.connect(self._change_theme)
         self.settings_page.folder_changed.connect(self._open_library)
         self.settings_page.language_changed.connect(self._pick_language)
-        self.pages.addWidget(self.add_page)
-        self.pages.addWidget(self.library_page)
-        self.pages.addWidget(self.people_page)
-        self.pages.addWidget(self.stats_page)
-        self.pages.addWidget(self.settings_page)
+        self.pages.addWidget(self._centered_page(self.add_page))
+        self.pages.addWidget(self._centered_page(self.library_page))
+        self.pages.addWidget(self._centered_page(self.people_page))
+        self.pages.addWidget(self._centered_page(self.stats_page))
+        self.pages.addWidget(self._centered_page(self.settings_page))
 
         self.nav_add = self._nav_button(side, "nav_add", 0, checked=True)
         self.nav_library = self._nav_button(side, "nav_library", 1)
@@ -313,6 +309,22 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(shell)
         self.shell = shell
         self.pages.setCurrentIndex(was_on)
+
+    def _centered_page(self, page: QWidget) -> QWidget:
+        """Wrap a page in a tighter, symmetric centered host."""
+        host = QWidget()
+        host.setObjectName("pageCenterHost")
+        host_layout = QVBoxLayout(host)
+        host_layout.setContentsMargins(0, 0, 0, 0)
+        host_layout.setSpacing(0)
+
+        page.setMaximumWidth(1180)
+        page.setMinimumWidth(760)
+        page.setSizePolicy(
+            page.sizePolicy().horizontalPolicy(), page.sizePolicy().verticalPolicy()
+        )
+        host_layout.addWidget(page, 0, Qt.AlignmentFlag.AlignHCenter)
+        return host
 
     def _nav_button(
         self, layout, key: str, index: int, checked: bool = False

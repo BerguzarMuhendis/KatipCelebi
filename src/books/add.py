@@ -35,6 +35,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QScrollArea,
     QTextEdit,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
@@ -90,9 +91,7 @@ FORM_SECTIONS = (
     ("section_content", ("subjects",)),
 )
 
-FORM_FIELDS = tuple(
-    name for _heading, names in FORM_SECTIONS for name in names
-)
+FORM_FIELDS = tuple(name for _heading, names in FORM_SECTIONS for name in names)
 
 
 class LookupSignals(QObject):
@@ -216,9 +215,7 @@ class AddBookPage(QWidget):
         )
         self.template_button.clicked.connect(self.save_template)
         bulk_row.addWidget(self.template_button)
-        self.import_button = dress(
-            QPushButton(text("import_button")), "import_button"
-        )
+        self.import_button = dress(QPushButton(text("import_button")), "import_button")
         self.import_button.clicked.connect(self.import_list)
         bulk_row.addWidget(self.import_button)
         bulk_row.addStretch(1)
@@ -239,11 +236,11 @@ class AddBookPage(QWidget):
         form.setContentsMargins(0, 0, 8, 0)
         form.setSpacing(10)
         for heading, names in FORM_SECTIONS:
-            self._section(form, heading)
+            fields_form = self._section(form, heading)
             for name in names:
                 edit = QLineEdit()
                 self.fields[name] = edit
-                form.addRow(QLabel(field_label(name) + ":"), edit)
+                fields_form.addRow(QLabel(field_label(name) + ":"), edit)
         self._build_personal(form)
         scroll.setWidget(host)
         layout.addWidget(scroll, 1)
@@ -254,19 +251,44 @@ class AddBookPage(QWidget):
         self.clear_button.clicked.connect(self.clear_form)
         buttons.addWidget(self.clear_button)
         self.save_button = dress(QPushButton(text("save")), "save")
-        self.save_button.setObjectName(
-            "primaryButton"
-        )  # the one filled action
+        self.save_button.setObjectName("primaryButton")  # the one filled action
         self.save_button.setDefault(True)
         self.save_button.clicked.connect(self.save_book)
         buttons.addWidget(self.save_button)
         layout.addLayout(buttons)
 
-    def _section(self, form, key: str) -> None:
-        """A block heading: its own row, across both columns."""
-        label = QLabel(text(key))
-        label.setObjectName("detailFieldLabel")
-        form.addRow(label)
+    def _section(self, form, key: str) -> QFormLayout:
+        """Create a collapsible section with a header and a form body."""
+        section = QWidget()
+        section_layout = QVBoxLayout(section)
+        section_layout.setContentsMargins(0, 0, 0, 0)
+        section_layout.setSpacing(6)
+
+        header = QToolButton()
+        header.setText(text(key))
+        header.setCheckable(True)
+        header.setChecked(True)
+        header.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+        header.setAutoRaise(True)
+        header.setArrowType(Qt.ArrowType.DownArrow)
+        header.setObjectName("detailFieldLabel")
+        section_layout.addWidget(header)
+
+        body = QWidget()
+        body_layout = QFormLayout(body)
+        body_layout.setContentsMargins(16, 0, 8, 0)
+        body_layout.setSpacing(10)
+        section_layout.addWidget(body)
+
+        def _sync_arrow(checked: bool) -> None:
+            header.setArrowType(
+                Qt.ArrowType.DownArrow if checked else Qt.ArrowType.RightArrow
+            )
+
+        header.toggled.connect(_sync_arrow)
+        header.toggled.connect(body.setVisible)
+        form.addRow(section)
+        return body_layout
 
     def _build_personal(self, form) -> None:
         """What you make of the book, rather than what the catalogue knows.
@@ -275,15 +297,15 @@ class AddBookPage(QWidget):
         here so that a book can be finished being entered in one go, instead of
         being saved and then opened again to say you liked it.
         """
-        self._section(form, "section_personal")
+        personal_form = self._section(form, "section_personal")
 
         self.stars = StarRating(editable=True, point_size=18)
-        form.addRow(QLabel(text("field_rating") + ":"), self.stars)
+        personal_form.addRow(QLabel(text("field_rating") + ":"), self.stars)
 
         self.status_combo = QComboBox()
         for status in STATUSES:
             self.status_combo.addItem(text("status_" + status), status)
-        form.addRow(QLabel(text("field_status") + ":"), self.status_combo)
+        personal_form.addRow(QLabel(text("field_status") + ":"), self.status_combo)
 
         tags_row = QHBoxLayout()
         tags_row.setContentsMargins(0, 0, 0, 0)
@@ -296,23 +318,23 @@ class AddBookPage(QWidget):
         self.tags_pick.setMinimumWidth(150)
         self.tags_pick.activated.connect(self._add_picked_tag)
         tags_row.addWidget(self.tags_pick)
-        form.addRow(QLabel(text("field_tags") + ":"), tags_row)
+        personal_form.addRow(QLabel(text("field_tags") + ":"), tags_row)
 
         self.signed_check = QCheckBox(text("field_signed"))
-        form.addRow("", self.signed_check)
+        personal_form.addRow("", self.signed_check)
 
-        self._section(form, "field_notes")
+        notes_form = self._section(form, "field_notes")
         self.notes_edit = QTextEdit()
         self.notes_edit.setPlaceholderText(text("notes_hint"))
         self.notes_edit.setFixedHeight(90)
         self.notes_edit.textChanged.connect(self._preview_notes)
-        form.addRow(self.notes_edit)
+        notes_form.addRow(self.notes_edit)
 
-        self._section(form, "notes_preview")
+        preview_form = self._section(form, "notes_preview")
         self.notes_preview = QLabel()
         self.notes_preview.setWordWrap(True)
         self.notes_preview.setTextFormat(Qt.TextFormat.MarkdownText)
-        form.addRow(self.notes_preview)
+        preview_form.addRow(self.notes_preview)
 
     def _preview_notes(self) -> None:
         self.notes_preview.setText(self.notes_edit.toPlainText())
@@ -419,9 +441,7 @@ class AddBookPage(QWidget):
         if not chosen:
             return
         if write_template(Path(chosen)):
-            self.status_label.setText(
-                text("template_done").format(path=chosen)
-            )
+            self.status_label.setText(text("template_done").format(path=chosen))
         else:
             self.status_label.setText(text("template_failed"))
 
@@ -492,9 +512,7 @@ class AddBookPage(QWidget):
             # Naming them, not just counting them: "not found: 2" out of a
             # hundred leaves somebody to work out which two by hand, and the
             # whole point of the list was not doing that.
-            said += "\n\n" + text("import_not_found").format(
-                isbns="\n".join(missing)
-            )
+            said += "\n\n" + text("import_not_found").format(isbns="\n".join(missing))
         QMessageBox.information(self, text("import_done_title"), said)
         if added:
             self.book_added.emit(added[-1].key)
@@ -643,14 +661,10 @@ class AddBookPage(QWidget):
     def _submission_done(self, reason: str) -> None:
         if reason == SUBMIT_OK:
             self.status_label.clear()
-            QMessageBox.information(
-                self, text("ol_thanks_title"), text("ol_thanks")
-            )
+            QMessageBox.information(self, text("ol_thanks_title"), text("ol_thanks"))
             return
         self.status_label.clear()
-        QMessageBox.warning(
-            self, text("ol_failed_title"), text("ol_" + reason)
-        )
+        QMessageBox.warning(self, text("ol_failed_title"), text("ol_" + reason))
 
     def _one_more_copy(self, existing: Book) -> None:
         """The same ISBN twice is the same book twice, not two books.
@@ -671,9 +685,7 @@ class AddBookPage(QWidget):
         QMessageBox.information(
             self,
             text("copies_added_title"),
-            text("copies_added").format(
-                title=existing.title, n=wanted.copy_count
-            ),
+            text("copies_added").format(title=existing.title, n=wanted.copy_count),
         )
         self.clear_form()
         self.book_added.emit(existing.key)

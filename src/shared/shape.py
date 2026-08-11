@@ -29,44 +29,33 @@ No Qt in this file: it is a list of numbers and the names for them.
 """
 
 # ------------------------------------------------------------ the corners ---
-# M3's shape scale. Expressive is the round end of it: buttons are pills, and
-# a container is properly round rather than slightly softened.
+# Fluent 2 spacing and radius choices: crisp, compact, and lightly rounded.
 NONE = 0
 EXTRA_SMALL = 4
-SMALL = 8
-MEDIUM = 12
-LARGE = 16
-EXTRA_LARGE = 28
-# A pill. M3's "full" shape is a radius of half the height, and for the app's
-# 40px-high buttons that is 20. It is written as the real number, not a huge
-# one: Qt's stylesheet does not clamp an oversized radius down to a clean pill
-# -- give it 999 and it renders a soft-cornered box instead -- so the pill has
-# to be told its actual size, and the buttons a matching height to meet it.
-PILL = 20
-BUTTON_HEIGHT = 40
-# Kept for anything whose height is unknown; the pill above is what the
-# buttons, the search bar and the navigation actually use.
+SMALL = 6
+MEDIUM = 8
+LARGE = 12
+EXTRA_LARGE = 16
+PILL = 12
+BUTTON_HEIGHT = 32
 FULL = 999
 
 # -------------------------------------------------------------- the words ---
-# M3's type scale, in the sizes this app actually reaches for. The names are
-# Google's; the numbers are the "medium" step of each, which is the one meant
-# for a desktop's density.
-DISPLAY_SMALL = 30
-HEADLINE_SMALL = 22
+# Fluent 2 desktop type sizing: compact text with stronger hierarchy for titles.
+DISPLAY_SMALL = 28
+HEADLINE_SMALL = 20
 TITLE_LARGE = 18
-TITLE_MEDIUM = 15
-BODY_LARGE = 14
-BODY_MEDIUM = 13
-LABEL_LARGE = 12
-LABEL_SMALL = 11
+TITLE_MEDIUM = 14
+BODY_LARGE = 13
+BODY_MEDIUM = 12
+LABEL_LARGE = 11
+LABEL_SMALL = 10
 
-# Expressive leans on weight rather than size to say what matters. Regular for
-# body, medium for the labels on buttons and tabs (M3's own weight for those),
-# and bold for the things that have to carry a heading.
+# Fluent 2 leans on a strong semantic hierarchy: regular body text, medium for
+# labels, semibold for headings and emphasis.
 REGULAR = 400
 MEDIUM = 500
-BOLD = 700
+BOLD = 600
 
 METRICS = {
     "r_none": NONE,
