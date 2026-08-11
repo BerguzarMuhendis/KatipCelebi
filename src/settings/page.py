@@ -49,7 +49,7 @@ from shared.theme import (
     theme_preview_pixmap,
 )
 
-APP_VERSION = "2.0"
+APP_VERSION = "2.0.0"
 
 # Big enough to be the app's face, small enough not to be the page.
 LOGO_SIZE = 72
