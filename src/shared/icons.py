@@ -14,19 +14,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""The app's pictures: its own icon and logo, the button icons, the flags.
+"""Icon helpers: choose platform icons where available, fall back to bundled SVGs.
 
-The button icons are Material Symbols, shipped in assets/icons (Apache 2.0 --
-see the LICENSE beside them). They are single-colour drawings with no colour
-of their own, so they are painted in the theme's text colour, which is also
-why they have to be repainted when the theme changes: see `redress`.
+Where possible the app uses the host platform's native icons (`QStyle`) so
+buttons match the look-and-feel the desktop provides. Older bundled SVGs are
+kept only as a fallback; they are single-colour drawings and are repainted in
+the current theme's text colour when used (see `redress`).
 
-Deliberately not the platform's own icons. The app follows the system for one
-thing only, light or dark; everything else it draws is Material Design 3, and
-a Windows floppy disk next to a Material Symbol looks like a mistake.
-
-A missing picture is never an error. An icon is decoration -- an app that will
-not start because a picture is missing is worse than an app with no picture.
+A missing picture is never treated as a fatal error: icons are decorative and
+the app continues to run without them.
 """
 
 import logging

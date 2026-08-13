@@ -25,14 +25,17 @@ field rather than the book.
 
 import json
 import logging
+import time
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
 from books import tags
 from books.model import Book, normalize_isbn
 from shared.paths import cover_cache_dir
+from books.excel import MAX_IMPORT_BYTES
 
 logger = logging.getLogger("katipcelebi")
 
@@ -68,20 +71,48 @@ def _get_json(url: str) -> Any:
     UTF-8 at all is a proxy's error page, which is a network problem, not a
     missing book.
     """
-    try:
-        request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-        with urllib.request.urlopen(request, timeout=TIMEOUT) as reply:
-            return json.loads(reply.read().decode("utf-8"))
-    except (
-        urllib.error.URLError,
-        urllib.error.HTTPError,
-        json.JSONDecodeError,
-        UnicodeDecodeError,
-        OSError,
-        TimeoutError,
-    ):
-        logger.debug("Open Library request failed: %s", url, exc_info=True)
-        return None
+    # Retry transient server errors (429, 5xx) a small number of times.
+    attempts = 3
+    backoff = 0.5
+    for attempt in range(attempts):
+        try:
+            request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+            with urllib.request.urlopen(request, timeout=TIMEOUT) as reply:
+                # Guard against very large responses.
+                cl = reply.getheader("Content-Length")
+                if cl is not None:
+                    try:
+                        size = int(cl)
+                    except Exception:
+                        size = None
+                    if size is not None and size > MAX_IMPORT_BYTES:
+                        logger.warning("Open Library reply too large: %s (%d bytes)", url, size)
+                        return None
+                data = reply.read(MAX_IMPORT_BYTES + 1)
+                if len(data) > MAX_IMPORT_BYTES:
+                    logger.warning("Open Library reply exceeded max size: %s", url)
+                    return None
+                return json.loads(data.decode("utf-8"))
+        except urllib.error.HTTPError as error:
+            # Retry on rate limiting or server errors.
+            code = getattr(error, "code", None)
+            if code == 429 or (code and 500 <= code < 600):
+                logger.debug("Transient HTTP error %s on %s, retrying (attempt %d)", code, url, attempt + 1)
+                time.sleep(backoff * (2 ** attempt))
+                continue
+            logger.debug("Open Library HTTP error: %s %s", code, url, exc_info=True)
+            return None
+        except (
+            urllib.error.URLError,
+            json.JSONDecodeError,
+            UnicodeDecodeError,
+            OSError,
+            TimeoutError,
+        ):
+            logger.debug("Open Library request failed: %s (attempt %d)", url, attempt + 1, exc_info=True)
+            time.sleep(backoff * (2 ** attempt))
+            continue
+    return None
 
 
 def _text(value: Any) -> str:
@@ -158,11 +189,19 @@ def fetch_book(isbn: str) -> Book | None:
     book.isbn_10 = ", ".join(_string_list(edition.get("isbn_10")))
     book.isbn_13 = ", ".join(_string_list(edition.get("isbn_13")))
 
-    names = [
-        _author_name(a["key"])
-        for a in _dict_list(edition.get("authors"))
-        if a.get("key")
-    ]
+    author_keys = [a.get("key") for a in _dict_list(edition.get("authors")) if a.get("key")]
+    names = []
+    if author_keys:
+        max_workers = min(8, len(author_keys))
+        with ThreadPoolExecutor(max_workers=max_workers) as ex:
+            futures = {ex.submit(_author_name, k): k for k in author_keys}
+            for fut in as_completed(futures):
+                try:
+                    n = fut.result()
+                except Exception:
+                    n = ""
+                if n:
+                    names.append(n)
     book.authors = ", ".join(name for name in names if name)
 
     spoken = []
@@ -322,7 +361,19 @@ def fetch_cover(isbn: str, size: str = COVER_SIZE_THUMB) -> bytes | None:
     try:
         request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
         with urllib.request.urlopen(request, timeout=TIMEOUT) as reply:
-            data = reply.read()
+            cl = reply.getheader("Content-Length")
+            if cl is not None:
+                try:
+                    size = int(cl)
+                except Exception:
+                    size = None
+                if size is not None and size > MAX_IMPORT_BYTES:
+                    logger.debug("Cover reply too large: %s (%d bytes)", url, size)
+                    return None
+            data = reply.read(MAX_IMPORT_BYTES + 1)
+            if len(data) > MAX_IMPORT_BYTES:
+                logger.debug("Cover reply exceeded max size: %s", url)
+                return None
     except (
         urllib.error.URLError,
         urllib.error.HTTPError,

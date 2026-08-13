@@ -96,7 +96,7 @@ KatipCelebi/
 │   └── build-linux-arch.sh
 ├── KatipCelebi.spec
 ├── requirements.txt
-├── LICENSE-GPLV3
+├── LICENSE
 ├── README.md
 ├── CONTRIBUTING.md
 └── .gitignore

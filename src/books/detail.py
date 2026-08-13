@@ -142,6 +142,7 @@ class BookDetail(QWidget):
 
         self.title_label = QLabel(book.title)
         self.title_label.setObjectName("pageTitle")
+        self.title_label.setTextFormat(Qt.TextFormat.PlainText)
         self.title_label.setWordWrap(True)
         column.addWidget(self.title_label)
 

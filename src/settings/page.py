@@ -23,7 +23,7 @@ import sys
 from html import escape
 from pathlib import Path
 
-from PyQt6.QtCore import QSize, Qt, pyqtSignal
+from PyQt6.QtCore import QSize, Qt, pyqtSignal, QThread
 from PyQt6.QtWidgets import (
     QComboBox,
     QFileDialog,
@@ -48,6 +48,7 @@ from shared.theme import (
     family,
     theme_preview_pixmap,
 )
+from shared.update import check_for_update
 
 APP_VERSION = "2.0.0"
 
@@ -192,7 +193,7 @@ class SettingsPage(QWidget):
         column.addWidget(self.update_label)
 
         update_row = QHBoxLayout()
-        self.update_button = QPushButton("Check for updates")
+        self.update_button = QPushButton(text("settings_check_updates"))
         self.update_button.clicked.connect(self._check_updates)
         update_row.addWidget(self.update_button)
         update_row.addStretch(1)
@@ -305,36 +306,75 @@ class SettingsPage(QWidget):
             self.qss_label.setText(str(default))
 
     def _update_status(self) -> None:
-        from shared.update import check_for_update
+        # Run the networked update check off the UI thread.
 
-        has_update, latest, release_url = check_for_update(APP_VERSION)
-        if has_update:
-            self.update_label.setText(
-                f"Update available: {latest}. Open {release_url} to download it."
-            )
-        else:
-            self.update_label.setText("You are using the latest version.")
+        class UpdateThread(QThread):
+            result = pyqtSignal(bool, str, str)
+
+            def __init__(self, version: str):
+                super().__init__()
+                self.version = version
+
+            def run(self) -> None:
+                try:
+                    has_update, latest, release_url = check_for_update(self.version)
+                except Exception:
+                    has_update, latest, release_url = False, "", ""
+                self.result.emit(has_update, latest, release_url)
+
+        # Keep a reference so the thread isn't GC'd.
+        self._update_thread = UpdateThread(APP_VERSION)
+        self._update_thread.result.connect(
+            lambda has, latest, url: self._on_update_result(has, latest, url, show_message=False)
+        )
+        self._update_thread.start()
 
     def _check_updates(self) -> None:
-        from shared.update import check_for_update
+        # User-initiated check: run off-thread and show a dialog when done.
+        if getattr(self, "_update_thread", None) and self._update_thread.isRunning():
+            return
+        self._update_thread = None
 
-        has_update, latest, release_url = check_for_update(APP_VERSION)
+
+        class UpdateThread(QThread):
+            result = pyqtSignal(bool, str, str)
+
+            def __init__(self, version: str):
+                super().__init__()
+                self.version = version
+
+            def run(self) -> None:
+                try:
+                    has_update, latest, release_url = check_for_update(self.version)
+                except Exception:
+                    has_update, latest, release_url = False, "", ""
+                self.result.emit(has_update, latest, release_url)
+
+        self._update_thread = UpdateThread(APP_VERSION)
+        self._update_thread.result.connect(
+            lambda has, latest, url: self._on_update_result(has, latest, url, show_message=True)
+        )
+        self._update_thread.start()
+
+    def _on_update_result(self, has_update: bool, latest: str, release_url: str, show_message: bool) -> None:
         if has_update:
             self.update_label.setText(
-                f"Update available: {latest}. Open {release_url} to download it."
+                text("settings_update_available").format(latest=latest, url=release_url)
             )
-            QMessageBox.information(
-                self,
-                "Update available",
-                f"A newer version ({latest}) is available.\n\n{release_url}",
-            )
+            if show_message:
+                QMessageBox.information(
+                    self,
+                    text("update_available_title"),
+                    text("update_available_message").format(latest=latest, url=release_url),
+                )
         else:
-            self.update_label.setText("You are using the latest version.")
-            QMessageBox.information(
-                self,
-                "Up to date",
-                "You are already using the latest version.",
-            )
+            self.update_label.setText(text("settings_update_latest"))
+            if show_message:
+                QMessageBox.information(
+                    self,
+                    text("up_to_date_title"),
+                    text("up_to_date_message"),
+                )
 
     def _open_qss(self) -> None:
         import subprocess

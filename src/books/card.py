@@ -123,17 +123,20 @@ class BookCard(QFrame):
         # One line, author first: on a shelf you look for who wrote it.
         self.name_label = QLabel(self._one_line())
         self.name_label.setObjectName("cardName")
+        self.name_label.setTextFormat(Qt.TextFormat.PlainText)
         self.name_label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         self.name_label.setWordWrap(True)
         self.name_label.setFixedWidth(THUMB_SIZE[0])
         layout.addWidget(self.name_label)
 
         self.stars = QLabel()
+        self.stars.setTextFormat(Qt.TextFormat.PlainText)
         self.stars.setObjectName("cardStars")
         self.stars.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         layout.addWidget(self.stars)
 
         self.badges = QLabel()
+        self.badges.setTextFormat(Qt.TextFormat.PlainText)
         self.badges.setObjectName("cardBadge")
         self.badges.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         layout.addWidget(self.badges)
