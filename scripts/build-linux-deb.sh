@@ -5,8 +5,7 @@ git clone https://github.com/farukylmz0550/KatipCelebi.git
 cd KatipCelebi
 sudo apt update
 sudo apt install -y python3 python3-pip python3-venv \
-  libgl1-mesa-glx libxkbcommon0 libdbus-1-3 libxcb-cursor0 \
-  adwaita-qt6 || true
+  libgl1-mesa-glx libxkbcommon0 libdbus-1-3 libxcb-cursor0 || true
 python3 -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.txt pyinstaller

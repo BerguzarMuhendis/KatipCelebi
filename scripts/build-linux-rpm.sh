@@ -4,7 +4,7 @@ set -euo pipefail
 git clone https://github.com/farukylmz0550/KatipCelebi.git
 cd KatipCelebi
 sudo dnf install -y python3 python3-pip mesa-libGL libxkbcommon dbus-libs \
-  xcb-util-cursor adwaita-qt6 || true
+  xcb-util-cursor || true
 python3 -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.txt pyinstaller

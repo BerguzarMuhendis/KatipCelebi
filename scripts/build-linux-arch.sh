@@ -3,8 +3,7 @@ set -euo pipefail
 
 git clone https://github.com/farukylmz0550/KatipCelebi.git
 cd KatipCelebi
-sudo pacman -S --needed python python-pip mesa libxkbcommon dbus xcb-util-cursor \
-  adwaita-qt6 || true
+sudo pacman -S --needed python python-pip mesa libxkbcommon dbus xcb-util-cursor || true
 python3 -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.txt pyinstaller
