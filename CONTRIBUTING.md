@@ -70,4 +70,35 @@ Fix any logical issues flagged by `ruff` (unused variables, unnecessary imports,
 - [ ] Has the app been manually run and the change tested (`python src/app.py`)?
 - [ ] Does the PR description explain what changed and why?
 
+## Running tests locally
+
+Before opening a PR, run the test suite locally to ensure nothing regresses:
+
+```bash
+python -m venv .venv
+# Windows
+.\.venv\Scripts\Activate
+pip install -r requirements.txt
+python -m pytest -q
+```
+
+## PR checklist
+
+- Keep changes focused: one feature or fix per PR.
+- Provide a short description and reference any related issue.
+- Include tests for new behaviour or bug fixes.
+- Update `CHANGELOG.md` and `VERSION` as appropriate for releases.
+
+## Commit messages and branching
+
+- Use short, imperative commit messages (e.g. "fix: handle missing ISBN").
+- Make small, atomic commits where each commit represents a single logical
+	change that can be reviewed independently.
+
+## Adding a language
+
+When adding a new language file in `assets/lang/`, copy `assets/lang/en.json`
+and translate the values. Keep the same keys and run the test suite to ensure
+no JSON errors.
+
 Contributions that follow these two guidelines will be reviewed and merged quickly. Feel free to open an issue if you have any questions.
