@@ -63,6 +63,14 @@ from books.store import Library
 from shared import credentials
 from shared.icons import dress
 from shared.texts import field_label, text
+from books.import_worker import (
+    LookupSignals,
+    LookupTask,
+    ImportSignals,
+    ImportTask,
+    SubmitSignals,
+    SubmitTask,
+)
 
 logger = logging.getLogger("katipcelebi")
 
@@ -94,99 +102,7 @@ FORM_SECTIONS = (
 FORM_FIELDS = tuple(name for _heading, names in FORM_SECTIONS for name in names)
 
 
-class LookupSignals(QObject):
-    done = pyqtSignal(object, str)  # Book | None, the ISBN it was asked about
 
-
-class LookupTask(QRunnable):
-    """Ask Open Library about one ISBN, off the main thread."""
-
-    def __init__(self, isbn: str, signals: LookupSignals):
-        super().__init__()
-        self.isbn = isbn
-        self.signals = signals
-
-    def run(self):
-        # Nothing escapes: an exception in a Qt thread is an abort, and a
-        # record we cannot read is, from where the user stands, no record.
-        try:
-            book = fetch_book(self.isbn)
-        except Exception:
-            logger.exception("Lookup failed for %s", self.isbn)
-            book = None
-        self.signals.done.emit(book, self.isbn)
-
-
-class ImportSignals(QObject):
-    done = pyqtSignal(list, list, bool)  # the books found, the ISBNs that were not, network_problem
-
-
-class ImportTask(QRunnable):
-    """Look a whole list of ISBNs up, off the main thread."""
-
-    def __init__(self, isbns: list, signals: ImportSignals):
-        super().__init__()
-        self.isbns = isbns
-        self.signals = signals
-
-    def run(self):
-        import time
-
-        found, missing = [], []
-        consecutive_failures = 0
-        network_problem = False
-        for isbn in self.isbns:
-            # Per ISBN, not per import: one unreadable record must not cost the
-            # user the other ninety-nine books on their list. And an exception
-            # let out of a Qt thread ends the process outright.
-            try:
-                book = fetch_book(isbn)
-            except Exception:
-                logger.exception("Lookup failed for %s during an import", isbn)
-                book = None
-            if book is None or not book.title:
-                missing.append(isbn)
-                consecutive_failures += 1
-            else:
-                found.append(book)
-                consecutive_failures = 0
-
-            # Throttle to be polite and avoid rate limiting.
-            time.sleep(0.2)
-
-            # If several lookups in a row fail, assume a network problem and
-            # stop early to avoid hammering the service and to report a clear
-            # error to the user.
-            if consecutive_failures >= 3:
-                network_problem = True
-                logger.warning("Import aborted after repeated lookup failures")
-                break
-        self.signals.done.emit(found, missing, network_problem)
-
-
-class SubmitSignals(QObject):
-    done = pyqtSignal(str)  # a submit reason: "" for success
-
-
-class SubmitTask(QRunnable):
-    """Offer one book to Open Library, off the main thread."""
-
-    def __init__(self, book, username, password, signals: SubmitSignals):
-        super().__init__()
-        self.book = book
-        self.username = username
-        self.password = password
-        self.signals = signals
-
-    def run(self):
-        # Nothing escapes a Qt thread and lives: an unhandled exception here is
-        # qFatal(), and a book that failed to upload is not worth the process.
-        try:
-            reason = submit_book(self.book, self.username, self.password)
-        except Exception:
-            logger.exception("Submitting %s to Open Library", self.book.key)
-            reason = SUBMIT_FAILED
-        self.signals.done.emit(reason)
 
 
 class AddBookPage(QWidget):
