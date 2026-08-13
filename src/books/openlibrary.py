@@ -41,7 +41,9 @@ logger = logging.getLogger("katipcelebi")
 
 # Open Library asks that tools identify themselves, so a misbehaving client can
 # be told apart from the rest.
-USER_AGENT = "KatipCelebi/2.0.0 (+https://github.com/farukylmz0550/KatipCelebi)"
+from shared.paths import project_version
+
+USER_AGENT = f"KatipCelebi/{project_version()} (+https://github.com/farukylmz0550/KatipCelebi)"
 API_ROOT = "https://openlibrary.org"
 COVERS_ROOT = "https://covers.openlibrary.org/b/isbn/"
 TIMEOUT = 10

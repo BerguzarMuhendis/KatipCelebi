@@ -40,6 +40,7 @@ from shared.icons import dress, logo, with_flag
 from shared.palette import has_a_desktop
 from shared.paths import cover_cache_dir
 from shared.texts import text
+from shared.paths import project_version
 from shared.theme import (
     DEFAULT_THEME,
     THEMES,
@@ -50,7 +51,7 @@ from shared.theme import (
 )
 from shared.update import check_for_update
 
-APP_VERSION = "2.0.0"
+APP_VERSION = project_version()
 
 # Big enough to be the app's face, small enough not to be the page.
 LOGO_SIZE = 72

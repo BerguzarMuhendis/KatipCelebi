@@ -88,3 +88,25 @@ def people_path(folder: Path) -> Path:
 
 def loans_path(folder: Path) -> Path:
     return Path(folder) / LOANS_FILENAME
+
+
+def repo_root() -> Path:
+    """The workspace root for a checkout.
+
+    When running from a checkout the repository root is three parents above
+    this file; when packaged, this may not exist and callers should handle
+    a missing `VERSION` file gracefully.
+    """
+    return Path(__file__).resolve().parent.parent.parent
+
+
+def project_version() -> str:
+    """Read `VERSION` from the project root if present, else return '0.0.0'."""
+    root = repo_root()
+    vfile = root / "VERSION"
+    try:
+        if vfile.exists():
+            return vfile.read_text(encoding="utf-8").strip()
+    except OSError:
+        pass
+    return "0.0.0"
