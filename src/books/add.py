@@ -118,7 +118,7 @@ class LookupTask(QRunnable):
 
 
 class ImportSignals(QObject):
-    done = pyqtSignal(list, list)  # the books found, the ISBNs that were not
+    done = pyqtSignal(list, list, bool)  # the books found, the ISBNs that were not, network_problem
 
 
 class ImportTask(QRunnable):
@@ -130,7 +130,11 @@ class ImportTask(QRunnable):
         self.signals = signals
 
     def run(self):
+        import time
+
         found, missing = [], []
+        consecutive_failures = 0
+        network_problem = False
         for isbn in self.isbns:
             # Per ISBN, not per import: one unreadable record must not cost the
             # user the other ninety-nine books on their list. And an exception
@@ -142,9 +146,22 @@ class ImportTask(QRunnable):
                 book = None
             if book is None or not book.title:
                 missing.append(isbn)
+                consecutive_failures += 1
             else:
                 found.append(book)
-        self.signals.done.emit(found, missing)
+                consecutive_failures = 0
+
+            # Throttle to be polite and avoid rate limiting.
+            time.sleep(0.2)
+
+            # If several lookups in a row fail, assume a network problem and
+            # stop early to avoid hammering the service and to report a clear
+            # error to the user.
+            if consecutive_failures >= 3:
+                network_problem = True
+                logger.warning("Import aborted after repeated lookup failures")
+                break
+        self.signals.done.emit(found, missing, network_problem)
 
 
 class SubmitSignals(QObject):
@@ -483,8 +500,16 @@ class AddBookPage(QWidget):
         self._import_signals = signals  # keep it alive until it has fired
         QThreadPool.globalInstance().start(ImportTask(isbns, signals))
 
-    def _import_done(self, found: list, missing: list) -> None:
+    def _import_done(self, found: list, missing: list, network_problem: bool) -> None:
         self.import_button.setEnabled(True)
+        if network_problem:
+            QMessageBox.critical(
+                self,
+                text("import_network_error_title"),
+                text("import_network_error"),
+            )
+            # Continue to show what we did manage to find and which are missing,
+            # rather than swallow the whole result.
         added, duplicates = [], []
         for book in found:
             if self.library.find(book.key) is not None:

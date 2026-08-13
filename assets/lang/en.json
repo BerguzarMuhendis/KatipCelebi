@@ -189,6 +189,8 @@
   "importing": "Looking up {n} ISBN(s)…",
   "import_unreadable_title": "That file could not be read",
   "import_unreadable": "It is not a spreadsheet this app can open.",
+  "import_network_error_title": "Import interrupted",
+  "import_network_error": "The import was interrupted by network problems. Try again later.",
   "import_too_large_title": "That file is too large",
   "import_too_large": "The biggest file this app imports is 20 MiB.",
   "import_none_title": "No ISBNs in there",

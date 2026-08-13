@@ -189,6 +189,8 @@
   "importing": "{n} ISBN aranıyor…",
   "import_unreadable_title": "O dosya okunamadı",
   "import_unreadable": "Bu uygulamanın açabileceği bir hesap tablosu değil.",
+  "import_network_error_title": "İçe aktarma kesildi",
+  "import_network_error": "İçe aktarma ağ sorunları nedeniyle kesildi. Daha sonra tekrar deneyin.",
   "import_too_large_title": "O dosya çok büyük",
   "import_too_large": "Bu uygulamanın içe aktarabileceği en büyük dosya 20 MiB.",
   "import_none_title": "İçinde ISBN yok",

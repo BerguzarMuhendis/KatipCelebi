@@ -188,6 +188,8 @@
   "importing": "Buscando {n} ISBN(s)…",
   "import_unreadable_title": "No se pudo leer el archivo",
   "import_unreadable": "No es una hoja de cálculo que esta app pueda abrir.",
+  "import_network_error_title": "Import interrumpido",
+  "import_network_error": "La importación se interrumpió por problemas de red. Inténtalo de nuevo más tarde.",
   "import_too_large_title": "Ese archivo es demasiado grande",
   "import_too_large": "El archivo más grande que esta app puede importar es de 20 MiB.",
   "import_none_title": "No hay ISBN",

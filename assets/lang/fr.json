@@ -188,6 +188,8 @@
   "importing": "Recherche de {n} ISBN…",
   "import_unreadable_title": "Impossible de lire le fichier",
   "import_unreadable": "Ce n'est pas un tableur que cette app peut ouvrir.",
+  "import_network_error_title": "Import interrompu",
+  "import_network_error": "L'import a été interrompu pour des raisons réseau. Réessayez plus tard.",
   "import_too_large_title": "Ce fichier est trop volumineux",
   "import_too_large": "Le plus gros fichier que cette app peut importer fait 20 Mio.",
   "import_none_title": "Aucun ISBN",

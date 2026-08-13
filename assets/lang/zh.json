@@ -188,6 +188,8 @@
   "importing": "查询 {n} 个 ISBN…",
   "import_unreadable_title": "无法读取文件",
   "import_unreadable": "这不是本应用能打开的表格文件。",
+  "import_network_error_title": "导入中断",
+  "import_network_error": "导入因网络问题中断。请稍后再试。",
   "import_too_large_title": "文件太大",
   "import_too_large": "本应用可导入的最大文件为 20 MiB。",
   "import_none_title": "无 ISBN",

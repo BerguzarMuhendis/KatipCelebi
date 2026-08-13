@@ -188,6 +188,8 @@
   "importing": "Поиск {n} ISBN…",
   "import_unreadable_title": "Не удалось прочитать файл",
   "import_unreadable": "Это не таблица, которую может открыть это приложение.",
+    "import_network_error_title": "Импорт прерван",
+    "import_network_error": "Импорт был прерван из-за проблем с сетью. Попробуйте позже.",
   "import_too_large_title": "Файл слишком большой",
   "import_too_large": "Самый большой файл для импорта — 20 МиБ.",
   "import_none_title": "Нет ISBN",
