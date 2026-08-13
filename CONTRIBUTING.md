@@ -16,9 +16,6 @@ KatipCelebi/
 │   ├── stats/                # charts, goals, statistics
 │   └── shared/               # theme, palette, icons, config — shared code
 ├── assets/
-│   ├── katipcelebi.ico
-│   ├── katipcelebi.png
-│   ├── katipcelebi.svg
 │   ├── lang/                  # language files (en, tr, ru, zh, es, fr)
 │   ├── screenshots/
 │   └── styles/                 # QSS theme files

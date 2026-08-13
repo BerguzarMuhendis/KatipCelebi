@@ -85,9 +85,6 @@ KatipCelebi/
 │   ├── stats/
 │   └── shared/
 ├── assets/
-│   ├── katipcelebi.ico
-│   ├── katipcelebi.png
-│   ├── katipcelebi.svg
 │   ├── lang/
 │   └── styles/
 ├── scripts/
