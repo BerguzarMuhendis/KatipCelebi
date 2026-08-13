@@ -142,7 +142,6 @@ def theme_preview_pixmap(name: str, size: int = 20):
     painter.end()
     return QIcon(pm)
 
-
 def system_prefers_dark(app) -> bool:
     """Whether the desktop is set to a dark theme.
 
@@ -210,68 +209,18 @@ def _wear_custom(app) -> None:
         _restore_platform_style(app)
         _seed = palette.DEFAULT_SEED
         _shades = palette.build(_seed, dark=True)
-        app.setStyleSheet(qss)
-    else:
-        logger.warning("Custom QSS not found; falling back to Default dark")
-        _wear_m3(app, True)
+    from .qss import load_custom_qss, apply_custom_qss
 
+    def apply_custom_qss(app) -> None:
+        """Apply the user's custom QSS on top of the current theme.
 
-# --------------------------------------------------- custom QSS loading ---
-from pathlib import Path as _Path
-
-
-def _qss_styles_dir() -> _Path:
-    """The directory that ships with the app, containing default.qss."""
-    bundled = getattr(sys, "_MEIPASS", None)
-    if bundled:
-        return _Path(bundled) / "assets" / "styles"
-    return _Path(__file__).resolve().parent.parent.parent / "assets" / "styles"
-
-
-def _qss_user_path() -> _Path:
-    """The user's custom QSS file in the app data directory."""
-    from shared.paths import app_data_dir
-
-    return app_data_dir() / "custom.qss"
-
-
-def load_custom_qss() -> str:
-    """Load the user's custom QSS, falling back to the shipped default.
-
-    Priority:  custom.qss in app data  >  assets/styles/default.qss  >  ""
-    The file is read as UTF-8 and a %(key)s substitution is performed so the
-    QSS can reference the app's accent colour, background, etc.
-    """
-    user = _qss_user_path()
-    default = _qss_styles_dir() / "default.qss"
-
-    path = user if user.exists() else default
-    if not path.exists():
-        return ""
-    try:
-        raw = path.read_text(encoding="utf-8")
-    except OSError:
-        return ""
-    # Substitute %(var)s tokens with live values from the current palette.
-    tokens = {
-        "accent": _shades.get("accent", "#0078d7"),
-        "accent_text": _shades.get("accent_text", "#ffffff"),
-        "window": _shades.get("window", "#f0f0f0"),
-        "text": _shades.get("text", "#000000"),
-        "text_soft": _shades.get("text_soft", "#606060"),
-        "border": _shades.get("border", "#c0c0c0"),
-        "sidebar": _shades.get("sidebar", "#e8e8e8"),
-        "danger": _shades.get("danger", "#c42b1c"),
-        "cover": _shades.get("cover", "#ffffff"),
-        "star": _shades.get("star", "#e6a800"),
-    }
-    try:
-        return raw % tokens
-    except (KeyError, TypeError):
-        return raw
-
-
-def apply_custom_qss(app) -> None:
-    """Apply the user's custom QSS on top of the current theme.
-
-We created core.py. Now need __init__.py file to re-export names. Create it. Then run pytest. Let's create __init__.py. !*** Proceed.**
+        """
+        qss = load_custom_qss()
+        if qss:
+            _restore_platform_style(app)
+            _seed = palette.DEFAULT_SEED
+            _shades = palette.build(_seed, dark=True)
+            app.setStyleSheet(qss)
+        else:
+            logger.warning("Custom QSS not found; falling back to Default dark")
+            _wear_m3(app, True)
