@@ -17,6 +17,8 @@
   "settings_colour_own": "所有颜色均基于 {colour} 按 Material Design 3 规则生成。桌面无强调色可用。",
   "settings_theme": "外观",
   "settings_language": "语言",
+  "theme_default_light": "默认（浅色）",
+  "theme_default_dark": "默认（深色）",
   "theme_fluent_light": "默认（浅色）",
   "theme_fluent_dark": "默认（深色）",
   "theme_contrast_light": "Contrast（浅色）",

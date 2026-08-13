@@ -249,7 +249,7 @@ class SettingsPage(QWidget):
         self.cache_label.setText(text("settings_cache_size").format(mb=cache_size_mb()))
         # The colour section only applies to the built-in Fluent/Contrast themes
         # and not to the custom QSS override, which can use any palette.
-        is_built_in = family(config.theme()) in {"fluent", "contrast"}
+        is_built_in = family(config.theme()) in {"default", "contrast"}
         self._colour_heading.setVisible(is_built_in)
         self.colour_label.setVisible(is_built_in)
         if is_built_in:

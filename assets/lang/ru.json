@@ -17,6 +17,8 @@
   "settings_colour_own": "Все цвета здесь определяются на основе {colour}) по правилам Material Design 3. У вашего рабочего стола нет цвета акцента.",
   "settings_theme": "Оформление",
   "settings_language": "Язык",
+  "theme_default_light": "По умолчанию (Светлая)",
+  "theme_default_dark": "По умолчанию (Тёмная)",
   "theme_fluent_light": "По умолчанию (Светлая)",
   "theme_fluent_dark": "По умолчанию (Тёмная)",
   "theme_contrast_light": "Contrast (Светлая)",

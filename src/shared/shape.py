@@ -29,7 +29,7 @@ No Qt in this file: it is a list of numbers and the names for them.
 """
 
 # ------------------------------------------------------------ the corners ---
-# Fluent 2 spacing and radius choices: crisp, compact, and lightly rounded.
+# Default spacing and radius choices: crisp, compact, and lightly rounded.
 NONE = 0
 EXTRA_SMALL = 4
 SMALL = 6
@@ -41,7 +41,7 @@ BUTTON_HEIGHT = 32
 FULL = 999
 
 # -------------------------------------------------------------- the words ---
-# Fluent 2 desktop type sizing: compact text with stronger hierarchy for titles.
+# Default desktop type sizing: compact text with stronger hierarchy for titles.
 DISPLAY_SMALL = 28
 HEADLINE_SMALL = 20
 TITLE_LARGE = 18
@@ -51,7 +51,7 @@ BODY_MEDIUM = 12
 LABEL_LARGE = 11
 LABEL_SMALL = 10
 
-# Fluent 2 leans on a strong semantic hierarchy: regular body text, medium for
+# Default design leans on a strong semantic hierarchy: regular body text, medium for
 # labels, semibold for headings and emphasis.
 REGULAR = 400
 MEDIUM = 500

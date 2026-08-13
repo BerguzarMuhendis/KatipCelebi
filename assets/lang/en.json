@@ -17,6 +17,8 @@
   "settings_colour_own": "Every colour here is worked out from {colour}, by Material Design 3's rules. Your desktop has no accent colour to follow.",
   "settings_theme": "How it looks",
   "settings_language": "Language",
+  "theme_default_light": "Default (Light)",
+  "theme_default_dark": "Default (Dark)",
   "theme_fluent_light": "Default (Light)",
   "theme_fluent_dark": "Default (Dark)",
   "theme_contrast_light": "Contrast (Light)",

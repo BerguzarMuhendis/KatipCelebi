@@ -41,16 +41,19 @@ DARK = "dark"
 LIGHT = "light"
 
 # The built-in themes, plus the retained custom QSS override.
-# "Fluent" keeps the app's own stylesheet; "Contrast" keeps the same layout
+# "Default" keeps the app's own stylesheet; "Contrast" keeps the same layout
 # but swaps in a stronger light/dark contrast palette. "Custom" loads the
 # user's own QSS file from the app data directory.
-FLUENT_LIGHT = "fluent-light"
-FLUENT_DARK = "fluent-dark"
+DEFAULT_LIGHT = "default-light"
+DEFAULT_DARK = "default-dark"
+# Backwards-compatible aliases for older saved settings and imports.
+FLUENT_LIGHT = DEFAULT_LIGHT
+FLUENT_DARK = DEFAULT_DARK
 CONTRAST_LIGHT = "contrast-light"
 CONTRAST_DARK = "contrast-dark"
 CUSTOM = "custom"
-THEMES = (FLUENT_LIGHT, FLUENT_DARK, CONTRAST_LIGHT, CONTRAST_DARK, CUSTOM)
-DEFAULT_THEME = FLUENT_DARK
+THEMES = (DEFAULT_LIGHT, DEFAULT_DARK, CONTRAST_LIGHT, CONTRAST_DARK, CUSTOM)
+DEFAULT_THEME = DEFAULT_DARK
 
 # GNOME's own chart palette is handled by the palette engine now.
 
@@ -77,7 +80,7 @@ def family(name: str) -> str:
         return "custom"
     if name.startswith("contrast"):
         return "contrast"
-    return "fluent"
+    return "default"
 
 
 def colours() -> dict:
@@ -107,8 +110,8 @@ def current_seed() -> str:
 # small swatch so the user can tell themes apart at a glance.  Each tuple is
 # (background, accent, text).
 _PREVIEW_COLOURS = {
-    FLUENT_LIGHT: ("#f5f5f5", "#0078d4", "#1f1f1f"),
-    FLUENT_DARK: ("#1b1b1b", "#5aa7ff", "#f5f5f5"),
+    DEFAULT_LIGHT: ("#f5f5f5", "#0078d4", "#1f1f1f"),
+    DEFAULT_DARK: ("#1b1b1b", "#5aa7ff", "#f5f5f5"),
     CONTRAST_LIGHT: ("#ffffff", "#0b57d0", "#000000"),
     CONTRAST_DARK: ("#000000", "#8ab4f8", "#ffffff"),
     CUSTOM: ("#f0f0f0", "#0078d7", "#000000"),
@@ -198,7 +201,7 @@ def _wear_contrast(app, dark: bool) -> None:
 
 # ------------------------------------------------------------ custom QSS ---
 def _wear_custom(app) -> None:
-    """Apply the user's custom QSS file. Falls back to the Fluent dark theme
+    """Apply the user's custom QSS file. Falls back to the Default dark theme
     if the file does not exist or cannot be read."""
     global _seed, _shades
     qss = load_custom_qss()
@@ -208,7 +211,7 @@ def _wear_custom(app) -> None:
         _shades = palette.build(_seed, dark=True)
         app.setStyleSheet(qss)
     else:
-        logger.warning("Custom QSS not found; falling back to Fluent dark")
+        logger.warning("Custom QSS not found; falling back to Default dark")
         _wear_m3(app, True)
 
 

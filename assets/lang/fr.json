@@ -17,6 +17,8 @@
   "settings_colour_own": "Toutes les couleurs sont calculées à partir de {colour}, selon les règles de Material Design 3. Votre bureau n'a pas de couleur d'accent.",
   "settings_theme": "Apparence",
   "settings_language": "Langue",
+  "theme_default_light": "Par défaut (Clair)",
+  "theme_default_dark": "Par défaut (Sombre)",
   "theme_fluent_light": "Par défaut (Clair)",
   "theme_fluent_dark": "Par défaut (Sombre)",
   "theme_contrast_light": "Contrast (Clair)",

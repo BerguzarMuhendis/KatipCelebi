@@ -31,7 +31,7 @@ Katip Celebi helps you keep a personal library organized, manage borrowers, and 
 - **ISBN list import** — bulk-import books from a spreadsheet
 - **Lending tracker** — record who borrowed what and when
 - **Reading statistics** — charts, summaries, and reading goals
-- **Theme support** — Fluent and contrast styles with light/dark modes
+- **Theme support** — Default and contrast styles with light/dark modes
 - **Multi-language** — English, Turkish, Russian, Chinese, Spanish, French
 - **Cross-platform** — works on Windows and Linux
 

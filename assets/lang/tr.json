@@ -17,6 +17,8 @@
   "settings_colour_own": "Buradaki her renk, {colour} renginden Material Design 3 kurallarına göre türetilir. Masaüstünüzün izlenecek bir vurgu rengi yok.",
   "settings_theme": "Nasıl göründüğü",
   "settings_language": "Dil",
+  "theme_default_light": "Varsayılan (Açık)",
+  "theme_default_dark": "Varsayılan (Koyu)",
   "theme_fluent_light": "Varsayılan (Açık)",
   "theme_fluent_dark": "Varsayılan (Koyu)",
   "theme_contrast_light": "Contrast (Açık)",

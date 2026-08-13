@@ -118,6 +118,8 @@ def theme() -> str:
         CONTRAST_LIGHT,
         CUSTOM,
         DEFAULT_THEME,
+        DEFAULT_DARK,
+        DEFAULT_LIGHT,
         FLUENT_DARK,
         FLUENT_LIGHT,
         THEMES,
@@ -126,16 +128,16 @@ def theme() -> str:
     data = load()
     saved = data.get("theme")
     legacy_map = {
-        "m3-light": FLUENT_LIGHT,
-        "m3-dark": FLUENT_DARK,
-        "adwaita-light": FLUENT_LIGHT,
-        "adwaita-dark": FLUENT_DARK,
-        "system": FLUENT_DARK,
+        "m3-light": DEFAULT_LIGHT,
+        "m3-dark": DEFAULT_DARK,
+        "adwaita-light": DEFAULT_LIGHT,
+        "adwaita-dark": DEFAULT_DARK,
+        "system": DEFAULT_DARK,
         "custom": CUSTOM,
         "contrast-light": CONTRAST_LIGHT,
         "contrast-dark": CONTRAST_DARK,
-        "fluent-light": FLUENT_LIGHT,
-        "fluent-dark": FLUENT_DARK,
+        "fluent-light": DEFAULT_LIGHT,
+        "fluent-dark": DEFAULT_DARK,
     }
     if saved in THEMES:
         return saved

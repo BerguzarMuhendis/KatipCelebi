@@ -17,6 +17,8 @@
   "settings_colour_own": "Todos los colores se calculan a partir de {colour}, según las reglas de Material Design 3. Tu escritorio no tiene un color de acento que seguir.",
   "settings_theme": "Apariencia",
   "settings_language": "Idioma",
+  "theme_default_light": "Predeterminado (Claro)",
+  "theme_default_dark": "Predeterminado (Oscuro)",
   "theme_fluent_light": "Predeterminado (Claro)",
   "theme_fluent_dark": "Predeterminado (Oscuro)",
   "theme_contrast_light": "Contrast (Claro)",
