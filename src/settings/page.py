@@ -308,20 +308,7 @@ class SettingsPage(QWidget):
 
     def _update_status(self) -> None:
         # Run the networked update check off the UI thread.
-
-        class UpdateThread(QThread):
-            result = pyqtSignal(bool, str, str)
-
-            def __init__(self, version: str):
-                super().__init__()
-                self.version = version
-
-            def run(self) -> None:
-                try:
-                    has_update, latest, release_url = check_for_update(self.version)
-                except Exception:
-                    has_update, latest, release_url = False, "", ""
-                self.result.emit(has_update, latest, release_url)
+        from shared.settings_helpers import UpdateThread
 
         # Keep a reference so the thread isn't GC'd.
         self._update_thread = UpdateThread(APP_VERSION)
@@ -336,20 +323,7 @@ class SettingsPage(QWidget):
             return
         self._update_thread = None
 
-
-        class UpdateThread(QThread):
-            result = pyqtSignal(bool, str, str)
-
-            def __init__(self, version: str):
-                super().__init__()
-                self.version = version
-
-            def run(self) -> None:
-                try:
-                    has_update, latest, release_url = check_for_update(self.version)
-                except Exception:
-                    has_update, latest, release_url = False, "", ""
-                self.result.emit(has_update, latest, release_url)
+        from shared.settings_helpers import UpdateThread
 
         self._update_thread = UpdateThread(APP_VERSION)
         self._update_thread.result.connect(
