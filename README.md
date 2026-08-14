@@ -6,8 +6,6 @@
   <img src="assets/katipcelebi.png" alt="Katip Celebi logo" width="48" />
 </h1>
 
-[![CI](https://github.com/farukylmz0550/KatipCelebi/actions/workflows/ci.yml/badge.svg)](https://github.com/farukylmz0550/KatipCelebi/actions)
-
 
 A desktop book library manager built with PyQt6. Track your books, lending history, reading goals, and statistics in a clean, modern interface.
 
