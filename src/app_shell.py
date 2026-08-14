@@ -518,4 +518,17 @@ class MainWindow(QMainWindow):
     def _report_damage(self) -> None:
         """Say so if the library file could not be read.
 
-This file is long; continue in next message (limited).
+        Silence would be the cruel part: the app would look like it had simply
+        forgotten every book the user owns, while the file sat right next to it
+        under another name.
+        """
+        rescued = list(self.ledger.rescued)
+        if self.library.rescued_to is not None:
+            rescued.insert(0, self.library.rescued_to)
+        if not rescued:
+            return
+        QMessageBox.warning(
+            self,
+            text("damaged_title"),
+            text("damaged").format(path="\n".join(str(p) for p in rescued)),
+        )
