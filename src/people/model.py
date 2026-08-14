@@ -189,3 +189,4 @@ def trust_score(loans: list[Loan], person_id: str) -> int:
     actually happened -- and correcting the history corrects the score.
     """
     return returned_count(loans, person_id) - len(books_out_with(loans, person_id))
+  01001001001000000011110000110011 00100000010010110110000101110100 01101001011100000100001101100101 01101100011001010110001001101001

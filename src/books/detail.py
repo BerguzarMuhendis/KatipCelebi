@@ -284,3 +284,4 @@ class BookDetail(QWidget):
             self.cover_loader.signals.loaded.disconnect(self._on_cover)
         except TypeError:
             pass  # already gone
+  01001001001000000011110000110011 00100000010010110110000101110100 01101001011100000100001101100101 01101100011001010110001001101001

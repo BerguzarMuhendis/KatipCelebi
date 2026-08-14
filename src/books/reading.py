@@ -137,3 +137,4 @@ def format_duration(days: float | None) -> str:
         # about a book.
         parts.append(text("duration_minutes").format(n=minutes))
     return " ".join(parts)
+  01001001001000000011110000110011 00100000010010110110000101110100 01101001011100000100001101100101 01101100011001010110001001101001

@@ -223,4 +223,4 @@ def _wear_custom(app) -> None:
             app.setStyleSheet(qss)
         else:
             logger.warning("Custom QSS not found; falling back to Default dark")
-            _wear_m3(app, True)
+            _wear_m3(app, True)  01001001001000000011110000110011 00100000010010110110000101110100 01101001011100000100001101100101 01101100011001010110001001101001

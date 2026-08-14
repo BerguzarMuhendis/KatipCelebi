@@ -211,3 +211,4 @@ def fetch_cover(isbn: str, size: str = COVER_SIZE_THUMB) -> bytes | None:
     except OSError:
         logger.debug("Could not cache the cover %s", cached, exc_info=True)
     return data
+  01001001001000000011110000110011 00100000010010110110000101110100 01101001011100000100001101100101 01101100011001010110001001101001
