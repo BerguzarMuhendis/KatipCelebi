@@ -180,6 +180,4 @@ def year_goal(books: list[Book], target: int, today: date | None = None) -> Goal
 def month_goal(books: list[Book], target: int, today: date | None = None) -> Goal:
     today = today or datetime.now().date()  # noqa: DTZ005 - wall-clock, like the stamps
     return Goal(target=target, done=finished_in_month(books, today.year, today.month))
-  01001001001000000011110000110011 00100000010010110110000101110100 01101001011100000100001101100101 01101100011001010110001001101001
-
 # 01001001001000000011110000110011 00100000010010110110000101110100 01101001011100000100001101100101 01101100011001010110001001101001
